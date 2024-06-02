@@ -2,6 +2,8 @@ package sqlstore
 
 import (
 	"booker/internal/app/model"
+	"fmt"
+	"log"
 )
 
 type BookerRepository struct {
@@ -19,4 +21,37 @@ func (r *BookerRepository) CreateItems(u *model.UserCostItems) error {
 		u.Code,
 		u.Description,
 	).Scan(&u.ID)
+}
+
+func (r *BookerRepository) GetAllItems() (map[string]interface{}, error) {
+	rows, err := r.store.db.Query(
+		"SELECT id, item_name, code, description FROM book_cost_items",
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cols, _ := rows.Columns()
+	m := make(map[string]interface{})
+
+	for rows.Next() {
+
+		columns := make([]interface{}, len(cols))
+		columnPointers := make([]interface{}, len(cols))
+		for i, _ := range columns {
+			columnPointers[i] = &columns[i]
+		}
+
+		if err := rows.Scan(columnPointers...); err != nil {
+			return nil, err
+		}
+
+		for i, colName := range cols {
+			val := columnPointers[i].(*interface{})
+			m[colName] = *val
+		}
+
+	}
+	fmt.Println(m)
+	return m, nil
 }

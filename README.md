@@ -9,6 +9,9 @@ go build -v ./cmd/apiserver
 
 ./apiserver
 
+Создаем БД
+createdb booker
+
 Миграции:
 
 migrate --path migrations --database "postgres://postgres:postgres@127.0.0.1:5432/booker?sslmode=disable" up
