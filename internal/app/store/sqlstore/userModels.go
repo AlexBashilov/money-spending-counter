@@ -52,15 +52,37 @@ func (r *BookerRepository) GetAllItems() (map[string]interface{}, error) {
 		}
 
 	}
-	fmt.Println(m)
 	return m, nil
 }
 
 func (r *BookerRepository) DeleteItems(id int) error {
-	rows, err := r.store.db.Exec("DELETE FROM  public.book_cost_items WHERE id = $1;", id)
-	fmt.Println(rows)
+	_, err := r.store.db.Exec("DELETE FROM  public.book_cost_items WHERE id = $1;", id)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return nil
+}
+
+func (r *BookerRepository) GetOnlyOneItem(itemId int) (*model.UserCostItems, error) {
+	var id int
+	var itemName string
+	var code int
+	var description string
+
+	u := &model.UserCostItems{
+		ID:          id,
+		ItemName:    itemName,
+		Code:        code,
+		Description: description,
+	}
+	rows := r.store.db.QueryRow(
+		"SELECT id, item_name, code, description FROM book_cost_items WHERE id = $1 ",
+		itemId,
+	).Scan(
+		&u.ID,
+		&u.ItemName,
+		&u.Code,
+		&u.Description)
+	fmt.Println(rows, u)
+	return u, nil
 }
