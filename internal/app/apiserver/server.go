@@ -33,6 +33,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) configureRouter() {
 	s.router.HandleFunc("/create_items", s.handleItemsCreate()).Methods("POST")
+	s.router.HandleFunc("/get_all_items", s.handleGetItems).Methods("GET")
 }
 
 func (s *server) handleItemsCreate() http.HandlerFunc {
@@ -60,6 +61,14 @@ func (s *server) handleItemsCreate() http.HandlerFunc {
 	}
 }
 
+func (s *server) handleGetItems(w http.ResponseWriter, r *http.Request) {
+	res, err := s.store.Booker().GetAllItems()
+	if err != nil {
+		s.error(w, r, http.StatusUnprocessableEntity, err)
+	}
+	respondWithJSON(w, http.StatusOK, res)
+}
+
 func (s *server) error(w http.ResponseWriter, r *http.Request, code int, err error) {
 	s.respond(w, r, code, map[string]string{"error": err.Error()})
 }
@@ -69,4 +78,12 @@ func (s *server) respond(w http.ResponseWriter, r *http.Request, code int, data 
 	if data != nil {
 		json.NewEncoder(w).Encode(data)
 	}
+}
+
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+	response, _ := json.Marshal(payload)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	w.Write(response)
 }

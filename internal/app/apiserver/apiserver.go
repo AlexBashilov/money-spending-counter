@@ -11,7 +11,7 @@ import (
 
 func Start(config *Config) error {
 	db, err := newDB(config.DataBaseURL)
-	fmt.Println(config.DataBaseURL)
+
 	if err != nil {
 		return err
 	}
@@ -20,6 +20,8 @@ func Start(config *Config) error {
 	store := sqlstore.New(db)
 
 	srv := newServer(store)
+
+	fmt.Println("Booker start =)")
 
 	return http.ListenAndServe(config.BindAddr, srv)
 }
