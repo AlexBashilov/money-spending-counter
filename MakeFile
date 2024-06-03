@@ -1,6 +1,5 @@
 .PHONY: build
 build:
-	go build -v ./cmd/apiserver touch ./apiserver
-
+	go build -v ./cmd/apiserver
 
 .DEFAULT_GOAL := build
