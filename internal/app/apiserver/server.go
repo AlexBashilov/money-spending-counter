@@ -4,9 +4,11 @@ import (
 	"booker/internal/app/model"
 	"booker/internal/app/store"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"strconv"
 )
 
 type server struct {
@@ -34,6 +36,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *server) configureRouter() {
 	s.router.HandleFunc("/create_items", s.handleItemsCreate()).Methods("POST")
 	s.router.HandleFunc("/get_all_items", s.handleGetItems).Methods("GET")
+	s.router.HandleFunc("/delete_items/{id}", s.handleItemsCreate()).Methods("DELETE")
 }
 
 func (s *server) handleItemsCreate() http.HandlerFunc {
@@ -66,6 +69,21 @@ func (s *server) handleGetItems(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.error(w, r, http.StatusUnprocessableEntity, err)
 	}
+	respondWithJSON(w, http.StatusOK, res)
+}
+
+func (s *server) handledeleteItems(w http.ResponseWriter, r *http.Request) {
+	eventID, err := strconv.Atoi(mux.Vars(r)["id"])
+	fmt.Println(eventID)
+	if err != nil {
+		s.error(w, r, http.StatusBadRequest, err)
+	}
+
+	res := s.store.Booker().DeleteItems(eventID)
+	if err != nil {
+		s.error(w, r, http.StatusUnprocessableEntity, err)
+	}
+
 	respondWithJSON(w, http.StatusOK, res)
 }
 
