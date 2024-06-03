@@ -88,5 +88,8 @@ func (s *server) handleGetOnlyOneItem(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.error(w, r, http.StatusInternalServerError, err)
 	}
+	if res == nil {
+		s.respond(w, r, http.StatusOK, err)
+	}
 	respondWithJSON(w, http.StatusOK, res)
 }

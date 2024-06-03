@@ -2,6 +2,8 @@ package sqlstore
 
 import (
 	"booker/internal/app/model"
+	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 )
@@ -23,7 +25,7 @@ func (r *BookerRepository) CreateItems(u *model.UserCostItems) error {
 	).Scan(&u.ID)
 }
 
-func (r *BookerRepository) GetAllItems() (map[string]interface{}, error) {
+func (r *BookerRepository) GetAllItems() ([]map[string]interface{}, error) {
 	rows, err := r.store.db.Query(
 		"SELECT id, item_name, code, description FROM book_cost_items",
 	)
@@ -31,28 +33,30 @@ func (r *BookerRepository) GetAllItems() (map[string]interface{}, error) {
 		log.Fatal(err)
 	}
 
-	cols, _ := rows.Columns()
-	m := make(map[string]interface{})
-
-	for rows.Next() {
-
-		columns := make([]interface{}, len(cols))
-		columnPointers := make([]interface{}, len(cols))
-		for i, _ := range columns {
-			columnPointers[i] = &columns[i]
-		}
-
-		if err := rows.Scan(columnPointers...); err != nil {
-			return nil, err
-		}
-
-		for i, colName := range cols {
-			val := columnPointers[i].(*interface{})
-			m[colName] = *val
-		}
-
+	colNames, err := rows.Columns()
+	if err != nil {
+		log.Fatal(err)
 	}
-	return m, nil
+	cols := make([]interface{}, len(colNames))
+	colPtrs := make([]interface{}, len(colNames))
+	for i := 0; i < len(colNames); i++ {
+		colPtrs[i] = &cols[i]
+	}
+
+	var mySlice = make([]map[string]interface{}, 0)
+	for rows.Next() {
+		var myMap = make(map[string]interface{})
+		err = rows.Scan(colPtrs...)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for i, col := range cols {
+			myMap[colNames[i]] = col
+		}
+		mySlice = append(mySlice, myMap)
+	}
+	return mySlice, nil
 }
 
 func (r *BookerRepository) DeleteItems(id int) error {
@@ -84,5 +88,8 @@ func (r *BookerRepository) GetOnlyOneItem(itemId int) (*model.UserCostItems, err
 		&u.Code,
 		&u.Description)
 	fmt.Println(rows, u)
+	if errors.Is(rows, sql.ErrNoRows) {
+		return nil, nil
+	}
 	return u, nil
 }
