@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"strconv"
 )
 
 type server struct {
@@ -34,6 +35,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *server) configureRouter() {
 	s.router.HandleFunc("/create_items", s.handleItemsCreate()).Methods("POST")
 	s.router.HandleFunc("/get_all_items", s.handleGetItems).Methods("GET")
+	s.router.HandleFunc("/delete_items/{id:[0-9]+}/", s.handleDeleteItems).Methods("DELETE")
 }
 
 func (s *server) handleItemsCreate() http.HandlerFunc {
@@ -67,6 +69,16 @@ func (s *server) handleGetItems(w http.ResponseWriter, r *http.Request) {
 		s.error(w, r, http.StatusUnprocessableEntity, err)
 	}
 	respondWithJSON(w, http.StatusOK, res)
+}
+
+func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
+	eventID, _ := strconv.Atoi(mux.Vars(r)["id"])
+
+	if err := s.store.Booker().DeleteItems(eventID); err != nil {
+		s.error(w, r, http.StatusUnprocessableEntity, err)
+	}
+
+	respondWithJSON(w, http.StatusOK, http.Response{})
 }
 
 func (s *server) error(w http.ResponseWriter, r *http.Request, code int, err error) {
