@@ -57,7 +57,8 @@ func (r *BookerRepository) GetAllItems() (map[string]interface{}, error) {
 }
 
 func (r *BookerRepository) DeleteItems(id int) error {
-	_, err := r.store.db.Exec("DELETE FROM  public.book_cost_items WHERE id = $1;", id)
+	rows, err := r.store.db.Exec("DELETE FROM  public.book_cost_items WHERE id = $1;", id)
+	fmt.Println(rows)
 	if err != nil {
 		log.Fatal(err)
 	}
