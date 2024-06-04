@@ -7,4 +7,5 @@ type BookerRepository interface {
 	GetAllItems() ([]map[string]interface{}, error)
 	GetOnlyOneItem(id int) (*model.UserCostItems, error)
 	DeleteItems(id int) error
+	CreateExpense(u *model.UserExpense) error
 }

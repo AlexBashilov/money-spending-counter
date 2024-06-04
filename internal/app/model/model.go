@@ -2,6 +2,7 @@ package model
 
 import (
 	validation "github.com/go-ozzo/ozzo-validation"
+	"time"
 )
 
 // Структура и описание статей затрат
@@ -13,12 +14,13 @@ type UserCostItems struct {
 }
 
 // Структура дневных затрат
-//type UserExpense struct {
-//	ID     int
-//	Amount float32
-//	Item   int
-//	Date   time.Time
-//}
+type UserExpense struct {
+	ID     int       `json:"id"`
+	Amount float32   `json:"amount"`
+	Date   time.Time `json:"date"`
+	Item   string    `json:"item"`
+	ItemId int       `json:"item_id"`
+}
 
 // /Validate ...
 func (u *UserCostItems) Validate() error {

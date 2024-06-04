@@ -8,7 +8,7 @@ CREATE TABLE book_cost_items (
 
 CREATE TABLE book_daily_expense (
                                  id BIGSERIAl NOT NULL PRIMARY KEY,
-                                 amount VARCHAR (30) NOT NULL,
-                                 item int,
-                                 date timestamp
+                                 amount FLOAT NOT NULL,
+                                 date timestamp,
+                                 item VARCHAR REFERENCES book_cost_items (item_name) ON DELETE CASCADE
 );

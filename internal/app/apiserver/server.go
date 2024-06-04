@@ -30,9 +30,10 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) configureRouter() {
-	s.router.HandleFunc("/create_items", s.handleItemsCreate()).Methods("POST")
-	s.router.HandleFunc("/get_all_items", s.handleGetItems).Methods("GET")
-	s.router.HandleFunc("/get_only_one_items/{id:[0-9]+}/", s.handleGetOnlyOneItem).Methods("GET")
-	s.router.HandleFunc("/delete_items/{id:[0-9]+}/", s.handleDeleteItems).Methods("DELETE")
-	s.router.HandleFunc("/update_items/{id:[0-9]+}/", s.handleItemsUpdate()).Methods("POST")
+	s.router.HandleFunc("/cost_items/create_items", s.handleItemsCreate()).Methods("POST")
+	s.router.HandleFunc("/cost_items/get_all_items", s.handleGetItems).Methods("GET")
+	s.router.HandleFunc("/cost_items/get_only_one_items/{id:[0-9]+}/", s.handleGetOnlyOneItem).Methods("GET")
+	s.router.HandleFunc("/cost_items/delete_items/{id:[0-9]+}/", s.handleDeleteItems).Methods("DELETE")
+	s.router.HandleFunc("/cost_items/update_items/{id:[0-9]+}/", s.handleItemsUpdate()).Methods("POST")
+	s.router.HandleFunc("/daily_expense/create_expense", s.handleExpenseCreate()).Methods("POST")
 }
