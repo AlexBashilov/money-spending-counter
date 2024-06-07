@@ -1,6 +1,7 @@
 package apiserver
 
 import (
+	_ "booker/docs"
 	"booker/internal/app/model"
 	"encoding/json"
 	"github.com/gorilla/mux"
@@ -8,6 +9,19 @@ import (
 	"strconv"
 )
 
+// CreateOrder Items
+//
+//	@Summary		handleItemsCreate
+//	@Description	handleItemsCreate
+//	@Tags			items
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		model.UserCostItems	true	"item_model"
+//	@Success		201		{string}	string
+//	@Failure		421		{string}	err
+//	@Failure		401		{string}	err
+//	@Failure		500		{string}	err
+//	@Router			/cost_items/create_items/ [post]
 func (s *server) handleItemsCreate() http.HandlerFunc {
 	type request struct {
 		ItemName    string `json:"item_name"`
