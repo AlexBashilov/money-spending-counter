@@ -36,4 +36,6 @@ func (s *server) configureRouter() {
 	s.router.HandleFunc("/cost_items/delete_items/{id:[0-9]+}/", s.handleDeleteItems).Methods("DELETE")
 	s.router.HandleFunc("/cost_items/update_items/{id:[0-9]+}/", s.handleItemsUpdate()).Methods("POST")
 	s.router.HandleFunc("/daily_expense/create_expense", s.handleExpenseCreate()).Methods("POST")
+	s.router.HandleFunc("/daily_expense/get_expense_by_id/{id:[0-9]+}/", s.handleGetExpenseByItem).Methods("GET")
+	s.router.HandleFunc("/daily_expense/get_expense_by_date/format", s.handleGetExpenseByDate).Methods("GET")
 }
