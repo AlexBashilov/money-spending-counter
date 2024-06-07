@@ -9,20 +9,16 @@ import (
 	"strconv"
 )
 
-// CreateOrder Items
+// HandleItemsCreate CreateItems		godoc
 //
-//	@Summary		handleItemsCreate
-//	@Description	handleItemsCreate
-//	@Tags			items
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body		model.UserCostItems	true	"item_model"
-//	@Success		201		{string}	string
-//	@Failure		421		{string}	err
-//	@Failure		401		{string}	err
-//	@Failure		500		{string}	err
-//	@Router			/cost_items/create_items/ [post]
-func (s *server) handleItemsCreate() http.HandlerFunc {
+//	@Summary		Create items
+//	@Description	Save items data in Db.
+//	@Param			tags	body	model.UserCostItems	true	"Create items"
+//	@Produce		application/json
+//	@Tags			tags
+//	@Success		201
+//	@Router			/cost_items/create_items [post]
+func (s *server) HandleItemsCreate() http.HandlerFunc {
 	type request struct {
 		ItemName    string `json:"item_name"`
 		Code        int    `json:"code"`
