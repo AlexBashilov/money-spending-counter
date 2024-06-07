@@ -1,10 +1,10 @@
 package sqlstore
 
-import "fmt"
-
 func (r *BookerRepository) checkItemIsExist(item string) (bool, error) {
 	var exists bool
-	query := fmt.Sprintf("SELECT EXISTS(SELECT item_name FROM book_cost_items WHERE item_name = %s)", item)
-	err := r.store.db.QueryRow(query).Scan(&exists)
-	return exists, err
+	err := r.store.db.QueryRow("SELECT EXISTS(SELECT item_name FROM book_cost_items WHERE item_name = $1)", item).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }
