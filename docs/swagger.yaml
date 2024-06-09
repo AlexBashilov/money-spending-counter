@@ -1,0 +1,141 @@
+definitions:
+  model.UserCostItems:
+    properties:
+      code:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      item_name:
+        type: string
+    type: object
+externalDocs:
+  url: https://swagger.io/resources/open-api/
+host: localhost:8080
+info:
+  contact: {}
+  description: This is an items API
+  termsOfService: http://swagger.io/terms/
+  title: Booker Api
+  version: "1.0"
+paths:
+  /cost_items/create:
+    post:
+      description: Create new items data in Db.
+      parameters:
+      - description: Create items
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserCostItems'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+      summary: Create items
+      tags:
+      - items
+  /cost_items/delete/{id}:
+    delete:
+      description: Delete items data from Db.
+      parameters:
+      - description: Delete Items by ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+      summary: Delete item by id
+      tags:
+      - items
+  /cost_items/get_all:
+    get:
+      description: Get all items recorded to DB
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+      summary: Get all items
+      tags:
+      - items
+  /cost_items/get_only_one/{id}:
+    get:
+      description: Get Items By Id
+      parameters:
+      - description: Get Items By Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+      summary: Get Items By Id
+      tags:
+      - items
+  /cost_items/update/{id}:
+    post:
+      description: Update items data in Db.
+      parameters:
+      - description: Update Items by ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "20":
+          description: ""
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+      summary: Update Items
+      tags:
+      - items
+swagger: "2.0"
