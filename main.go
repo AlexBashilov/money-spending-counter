@@ -16,12 +16,12 @@ func init() {
 	flag.StringVar(&configPath, "config-path", "configs/apiserver.toml", "path to config file")
 }
 
-// @title			Booker Api
-// @version		1.0
-// @description	This is an items API
-// @termsOfService	http://swagger.io/terms/
-
-// @host localhost:8080
+// @title				Booker Api
+// @version			1.0
+// @description		This is an items API
+// @termsOfService		http://swagger.io/terms/
+// @externalDocs.url	https://swagger.io/resources/open-api/
+// @host				localhost:8080
 func main() {
 	flag.Parse()
 
