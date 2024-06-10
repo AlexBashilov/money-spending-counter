@@ -22,6 +22,12 @@ type UserExpense struct {
 	ItemId int       `json:"item_id"`
 }
 
+type ExpensePeriod struct {
+	FromDate time.Time `json:"fromdate"`
+	ToDate   time.Time `json:"todate"`
+	Item     string    `json:"item"`
+}
+
 // /Validate ...
 func (u *UserCostItems) Validate() error {
 	return validation.ValidateStruct(

@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -49,22 +48,61 @@ func (s *server) handleGetExpenseByItem(w http.ResponseWriter, r *http.Request) 
 	respondWithJSON(w, http.StatusOK, res)
 }
 
+// handleExpenseByDate handleGetExpenseByDate		godoc
+//
+//	@Summary		Get Expense By date
+//	@Description	Get Expense By date
+//
+//	@Produce		application/json
+//	@Tags			expense
+//	@Success		200	{string}	response.Response{}
+//	@Failure		422	{string}	response.Response{}
+//
+//	@Router			/daily_expense/get_by_date [get]
 func (s *server) handleGetExpenseByDate(w http.ResponseWriter, r *http.Request) {
-	param := "from="
-	layout := "2006-01-02T15:04:05-07:00"
-	length := len(param) + len(layout)
-
-	if s := r.URL.RawQuery; len(s) < length || !strings.HasPrefix(s, param) {
-		// unexpected query
+	type request struct {
+		FromDate time.Time `json:"from_date"`
+		ToDate   time.Time `json:"to_date"`
 	}
-	dateTime := r.URL.RawQuery[len(param):length]
-	formattedTime, err := time.Parse(layout, dateTime)
-	if err != nil {
+	req := &request{}
+	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+		fmt.Println(req)
 		s.error(w, r, http.StatusBadRequest, err)
+		return
 	}
+	fmt.Println(req)
 
-	fmt.Println(formattedTime)
+	formattedTime := &model.ExpensePeriod{
+		FromDate: req.FromDate,
+		ToDate:   req.ToDate,
+	}
 	res, err := s.store.Booker().GeExpenseByDate(formattedTime)
+	if err != nil {
+		s.error(w, r, http.StatusUnprocessableEntity, err)
+	}
+	respondWithJSON(w, http.StatusOK, res)
+}
+
+func (s *server) handleGetExpenseByItemAndDate(w http.ResponseWriter, r *http.Request) {
+	type request struct {
+		FromDate time.Time `json:"from_date"`
+		ToDate   time.Time `json:"to_date"`
+		Item     string    `json:"item"`
+	}
+	req := &request{}
+	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+		fmt.Println(req)
+		s.error(w, r, http.StatusBadRequest, err)
+		return
+	}
+	fmt.Println(req)
+
+	timeAndExpense := &model.ExpensePeriod{
+		FromDate: req.FromDate,
+		ToDate:   req.ToDate,
+		Item:     req.Item,
+	}
+	res, err := s.store.Booker().GeExpenseByItemAndDate(timeAndExpense)
 	if err != nil {
 		s.error(w, r, http.StatusUnprocessableEntity, err)
 	}

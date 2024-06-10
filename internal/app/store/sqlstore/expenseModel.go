@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"time"
 )
 
 func (r *BookerRepository) CreateExpense(u *model.UserExpense) error {
@@ -77,13 +76,46 @@ func (r *BookerRepository) GetExpenseByItem(itemID int) ([]map[string]interface{
 	return mySlice, nil
 }
 
-func (r *BookerRepository) GeExpenseByDate(date time.Time) ([]map[string]interface{}, error) {
+func (r *BookerRepository) GeExpenseByDate(time *model.ExpensePeriod) ([]map[string]interface{}, error) {
 	rows, err := r.store.db.Query(
-		"SELECT id, amount, date, item FROM book_daily_expense WHERE date = $1", date)
+		"SELECT id, amount, date, item FROM book_daily_expense WHERE date >= $1 AND date <= $2", time.FromDate, time.ToDate)
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(rows)
+	colNames, err := rows.Columns()
+	if err != nil {
+		log.Fatal(err)
+	}
+	cols := make([]interface{}, len(colNames))
+	colPtrs := make([]interface{}, len(colNames))
+	for i := 0; i < len(colNames); i++ {
+		colPtrs[i] = &cols[i]
+	}
 
+	var mySlice = make([]map[string]interface{}, 0)
+	for rows.Next() {
+		var myMap = make(map[string]interface{})
+		err = rows.Scan(colPtrs...)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for i, col := range cols {
+			myMap[colNames[i]] = col
+		}
+		mySlice = append(mySlice, myMap)
+	}
+	return mySlice, nil
+}
+
+func (r *BookerRepository) GeExpenseByItemAndDate(time *model.ExpensePeriod) ([]map[string]interface{}, error) {
+	rows, err := r.store.db.Query(
+		"SELECT id, amount, date, item FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND item = $3", time.FromDate, time.ToDate, time.Item)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(rows)
 	colNames, err := rows.Columns()
 	if err != nil {
 		log.Fatal(err)

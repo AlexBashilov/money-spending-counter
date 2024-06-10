@@ -195,6 +195,32 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/daily_expense/get_by_date": {
+            "get": {
+                "description": "Get Expense By date",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Get Expense By date",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {

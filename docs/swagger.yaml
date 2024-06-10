@@ -138,4 +138,21 @@ paths:
       summary: Update Items
       tags:
       - items
+  /daily_expense/get_by_date:
+    get:
+      description: Get Expense By date
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+      summary: Get Expense By date
+      tags:
+      - expense
 swagger: "2.0"
