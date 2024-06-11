@@ -9,7 +9,6 @@ import (
 
 func (r *BookerRepository) CreateExpense(u *model.UserExpense) error {
 	exists, _ := r.checkItemIsExist(u.Item)
-	fmt.Println(exists)
 	if exists == true {
 		return r.store.db.QueryRow(
 			"INSERT INTO book_daily_expense (amount, date, item) VALUES ($1, $2, $3) RETURNING id",
@@ -60,20 +59,20 @@ func (r *BookerRepository) GetExpenseByItem(itemID int) ([]map[string]interface{
 		colPtrs[i] = &cols[i]
 	}
 
-	var mySlice = make([]map[string]interface{}, 0)
+	var querySlice = make([]map[string]interface{}, 0)
 	for rows.Next() {
-		var myMap = make(map[string]interface{})
+		var queryMap = make(map[string]interface{})
 		err = rows.Scan(colPtrs...)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		for i, col := range cols {
-			myMap[colNames[i]] = col
+			queryMap[colNames[i]] = col
 		}
-		mySlice = append(mySlice, myMap)
+		querySlice = append(querySlice, queryMap)
 	}
-	return mySlice, nil
+	return querySlice, nil
 }
 
 func (r *BookerRepository) GeExpenseByDate(time *model.ExpensePeriod) ([]map[string]interface{}, error) {
@@ -82,7 +81,6 @@ func (r *BookerRepository) GeExpenseByDate(time *model.ExpensePeriod) ([]map[str
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(rows)
 	colNames, err := rows.Columns()
 	if err != nil {
 		log.Fatal(err)
@@ -93,20 +91,20 @@ func (r *BookerRepository) GeExpenseByDate(time *model.ExpensePeriod) ([]map[str
 		colPtrs[i] = &cols[i]
 	}
 
-	var mySlice = make([]map[string]interface{}, 0)
+	var querySlice = make([]map[string]interface{}, 0)
 	for rows.Next() {
-		var myMap = make(map[string]interface{})
+		var queryMap = make(map[string]interface{})
 		err = rows.Scan(colPtrs...)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		for i, col := range cols {
-			myMap[colNames[i]] = col
+			queryMap[colNames[i]] = col
 		}
-		mySlice = append(mySlice, myMap)
+		querySlice = append(querySlice, queryMap)
 	}
-	return mySlice, nil
+	return querySlice, nil
 }
 
 func (r *BookerRepository) GeExpenseByItemAndDate(time *model.ExpensePeriod) ([]map[string]interface{}, error) {
@@ -115,7 +113,6 @@ func (r *BookerRepository) GeExpenseByItemAndDate(time *model.ExpensePeriod) ([]
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(rows)
 	colNames, err := rows.Columns()
 	if err != nil {
 		log.Fatal(err)
@@ -126,18 +123,18 @@ func (r *BookerRepository) GeExpenseByItemAndDate(time *model.ExpensePeriod) ([]
 		colPtrs[i] = &cols[i]
 	}
 
-	var mySlice = make([]map[string]interface{}, 0)
+	var querySlice = make([]map[string]interface{}, 0)
 	for rows.Next() {
-		var myMap = make(map[string]interface{})
+		var queryMap = make(map[string]interface{})
 		err = rows.Scan(colPtrs...)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		for i, col := range cols {
-			myMap[colNames[i]] = col
+			queryMap[colNames[i]] = col
 		}
-		mySlice = append(mySlice, myMap)
+		querySlice = append(querySlice, queryMap)
 	}
-	return mySlice, nil
+	return querySlice, nil
 }

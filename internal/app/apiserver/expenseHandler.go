@@ -66,11 +66,9 @@ func (s *server) handleGetExpenseByDate(w http.ResponseWriter, r *http.Request) 
 	}
 	req := &request{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		fmt.Println(req)
 		s.error(w, r, http.StatusBadRequest, err)
 		return
 	}
-	fmt.Println(req)
 
 	formattedTime := &model.ExpensePeriod{
 		FromDate: req.FromDate,
