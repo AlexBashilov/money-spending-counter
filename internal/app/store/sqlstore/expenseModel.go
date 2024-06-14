@@ -138,3 +138,47 @@ func (r *BookerRepository) GeExpenseByItemAndDate(time *model.ExpensePeriod) ([]
 	}
 	return querySlice, nil
 }
+
+func (r *BookerRepository) GetExpenseSummByPeriodAndItem(time *model.ExpensePeriod) (string, error) {
+	var expenseSumm, expenseQuantity float64
+
+	if err := r.store.db.QueryRow(
+		"SELECT SUM(amount) FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND item = $3",
+		time.FromDate,
+		time.ToDate,
+		time.Item).Scan(&expenseSumm); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := r.store.db.QueryRow(
+		"SELECT count(*) item FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND item = $3",
+		time.FromDate,
+		time.ToDate,
+		time.Item).Scan(&expenseQuantity); err != nil {
+		log.Fatal(err)
+	}
+
+	formattedResponse := fmt.Sprintf("Вы потратили - %d, Количество трат - %d", int(expenseSumm), int(expenseQuantity))
+	return formattedResponse, nil
+}
+
+func (r *BookerRepository) GetExpenseSummByPeriod(time *model.ExpensePeriod) (string, error) {
+	var expenseSumm, expenseQuantity float64
+
+	if err := r.store.db.QueryRow(
+		"SELECT SUM(amount) FROM book_daily_expense WHERE date >= $1 AND date <= $2",
+		time.FromDate,
+		time.ToDate).Scan(&expenseSumm); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := r.store.db.QueryRow(
+		"SELECT count(*) item FROM book_daily_expense WHERE date >= $1 AND date <= $2",
+		time.FromDate,
+		time.ToDate).Scan(&expenseQuantity); err != nil {
+		log.Fatal(err)
+	}
+
+	formattedResponse := fmt.Sprintf("Вы потратили - %d, Количество трат - %d", int(expenseSumm), int(expenseQuantity))
+	return formattedResponse, nil
+}

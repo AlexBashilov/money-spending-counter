@@ -3,7 +3,6 @@ package apiserver
 import (
 	"booker/internal/app/model"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
@@ -89,11 +88,9 @@ func (s *server) handleGetExpenseByItemAndDate(w http.ResponseWriter, r *http.Re
 	}
 	req := &request{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		fmt.Println(req)
 		s.error(w, r, http.StatusBadRequest, err)
 		return
 	}
-	fmt.Println(req)
 
 	timeAndExpense := &model.ExpensePeriod{
 		FromDate: req.FromDate,
@@ -105,4 +102,38 @@ func (s *server) handleGetExpenseByItemAndDate(w http.ResponseWriter, r *http.Re
 		s.error(w, r, http.StatusUnprocessableEntity, err)
 	}
 	respondWithJSON(w, http.StatusOK, res)
+}
+
+func (s *server) handleGetExpenseSummByPeriod(w http.ResponseWriter, r *http.Request) {
+	type request struct {
+		FromDate time.Time `json:"from_date"`
+		ToDate   time.Time `json:"to_date"`
+		Item     string    `json:"item"`
+	}
+	req := &request{}
+	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+		s.error(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	timeAndExpense := &model.ExpensePeriod{
+		FromDate: req.FromDate,
+		ToDate:   req.ToDate,
+		Item:     req.Item,
+	}
+
+	if req.Item != "" {
+		res, err := s.store.Booker().GetExpenseSummByPeriodAndItem(timeAndExpense)
+		if err != nil {
+			s.error(w, r, http.StatusUnprocessableEntity, err)
+		}
+		respondWithJSON(w, http.StatusOK, res)
+	} else {
+		res, err := s.store.Booker().GetExpenseSummByPeriod(timeAndExpense)
+		if err != nil {
+			s.error(w, r, http.StatusUnprocessableEntity, err)
+		}
+		respondWithJSON(w, http.StatusOK, res)
+	}
+
 }

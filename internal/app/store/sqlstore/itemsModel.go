@@ -4,7 +4,6 @@ import (
 	"booker/internal/app/model"
 	"database/sql"
 	"errors"
-	"fmt"
 	"log"
 )
 
@@ -87,7 +86,6 @@ func (r *BookerRepository) GetOnlyOneItem(itemId int) (*model.UserCostItems, err
 		&u.ItemName,
 		&u.Code,
 		&u.Description)
-	fmt.Println(rows, u)
 	if errors.Is(rows, sql.ErrNoRows) {
 		return nil, nil
 	}

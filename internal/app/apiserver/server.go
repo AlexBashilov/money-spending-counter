@@ -42,5 +42,6 @@ func (s *server) configureRouter() {
 	s.router.HandleFunc("/daily_expense/get_by_id/{id:[0-9]+}", s.handleGetExpenseByItem).Methods("GET")
 	s.router.HandleFunc("/daily_expense/get_by_date", s.handleGetExpenseByDate).Methods("GET")
 	s.router.HandleFunc("/daily_expense/get_by_date_and_item", s.handleGetExpenseByItemAndDate).Methods("GET")
+	s.router.HandleFunc("/daily_expense/get_summ_by_period", s.handleGetExpenseSummByPeriod).Methods("GET")
 	s.router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 }
