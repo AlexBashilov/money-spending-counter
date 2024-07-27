@@ -13,7 +13,8 @@ createdb booker
 
 Миграции:
 
-migrate --path migrations --database "postgres://postgres:post
+migrate create -ext sql -dir db/migrations -seq init_schema
+
 
 генерация документации swagger:
 
