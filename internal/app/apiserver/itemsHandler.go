@@ -83,6 +83,10 @@ func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 		s.error(w, r, http.StatusUnprocessableEntity, err)
 	}
 
+	if err := s.store.Booker().AddDeletedTime(itemID); err != nil {
+		s.error(w, r, http.StatusUnprocessableEntity, err)
+	}
+
 	respondWithJSON(w, http.StatusOK, map[string]string{"result": "item deleted"})
 }
 

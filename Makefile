@@ -11,10 +11,10 @@ dbDownContainer:
 	docker stop $(docker ps -q)
 
 createdb:
-		docker exec -it booker_db_1 createdb --username=root --owner=root booker
+		docker exec -it money-spending-counter_db_1 createdb --username=root --owner=root booker
 
 dropdb:
-		docker exec -it booker_db_1 dropdb booker
+		docker exec -it money-spending-counter_db_1 dropdb booker
 
 migrateup:
 		migrate -path db/migration -database "postgresql://root:root@localhost:5433/booker?sslmode=disable" -verbose up

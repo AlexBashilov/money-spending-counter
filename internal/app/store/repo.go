@@ -16,4 +16,5 @@ type BookerRepository interface {
 	GeExpenseByItemAndDate(time *model.ExpensePeriod) ([]map[string]interface{}, error)
 	GetExpenseSummByPeriodAndItem(time *model.ExpensePeriod) (string, error)
 	GetExpenseSummByPeriod(time *model.ExpensePeriod) (string, error)
+	AddDeletedTime(int) error
 }

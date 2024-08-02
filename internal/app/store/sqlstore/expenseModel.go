@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 )
 
 func (r *BookerRepository) CreateExpense(u *model.UserExpense) error {
@@ -38,13 +39,12 @@ func (r *BookerRepository) UpdateItemID(item string) error {
 	if err != nil {
 		return errors.New("failed to update item_id")
 	}
-	fmt.Println("ITEM - ", id)
 	return nil
 }
 
 func (r *BookerRepository) GetExpenseByItem(itemID int) ([]map[string]interface{}, error) {
 	rows, err := r.store.db.Query(
-		"SELECT item, amount, date FROM book_daily_expense WHERE item_id = $1", itemID)
+		"SELECT item, amount, date FROM book_daily_expense WHERE item_id = $1 AND deleted_at IS NULL", itemID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -77,7 +77,7 @@ func (r *BookerRepository) GetExpenseByItem(itemID int) ([]map[string]interface{
 
 func (r *BookerRepository) GeExpenseByDate(time *model.ExpensePeriod) ([]map[string]interface{}, error) {
 	rows, err := r.store.db.Query(
-		"SELECT id, amount, date, item FROM book_daily_expense WHERE date >= $1 AND date <= $2", time.FromDate, time.ToDate)
+		"SELECT id, amount, date, item FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND deleted_at IS NULL", time.FromDate, time.ToDate)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -109,7 +109,7 @@ func (r *BookerRepository) GeExpenseByDate(time *model.ExpensePeriod) ([]map[str
 
 func (r *BookerRepository) GeExpenseByItemAndDate(time *model.ExpensePeriod) ([]map[string]interface{}, error) {
 	rows, err := r.store.db.Query(
-		"SELECT id, amount, date, item FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND item = $3", time.FromDate, time.ToDate, time.Item)
+		"SELECT id, amount, date, item FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND item = $3 AND deleted_at IS NULL", time.FromDate, time.ToDate, time.Item)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -143,7 +143,7 @@ func (r *BookerRepository) GetExpenseSummByPeriodAndItem(time *model.ExpensePeri
 	var expenseSumm, expenseQuantity float64
 
 	if err := r.store.db.QueryRow(
-		"SELECT SUM(amount) FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND item = $3",
+		"SELECT SUM(amount) FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND item = $3 AND deleted_at IS NULL",
 		time.FromDate,
 		time.ToDate,
 		time.Item).Scan(&expenseSumm); err != nil {
@@ -151,7 +151,7 @@ func (r *BookerRepository) GetExpenseSummByPeriodAndItem(time *model.ExpensePeri
 	}
 
 	if err := r.store.db.QueryRow(
-		"SELECT count(*) item FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND item = $3",
+		"SELECT count(*) item FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND item = $3 AND deleted_at IS NULL",
 		time.FromDate,
 		time.ToDate,
 		time.Item).Scan(&expenseQuantity); err != nil {
@@ -166,14 +166,14 @@ func (r *BookerRepository) GetExpenseSummByPeriod(time *model.ExpensePeriod) (st
 	var expenseSumm, expenseQuantity float64
 
 	if err := r.store.db.QueryRow(
-		"SELECT SUM(amount) FROM book_daily_expense WHERE date >= $1 AND date <= $2",
+		"SELECT SUM(amount) FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND deleted_at IS NULL",
 		time.FromDate,
 		time.ToDate).Scan(&expenseSumm); err != nil {
 		log.Fatal(err)
 	}
 
 	if err := r.store.db.QueryRow(
-		"SELECT count(*) item FROM book_daily_expense WHERE date >= $1 AND date <= $2",
+		"SELECT count(*) item FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND deleted_at IS NULL",
 		time.FromDate,
 		time.ToDate).Scan(&expenseQuantity); err != nil {
 		log.Fatal(err)
@@ -181,4 +181,23 @@ func (r *BookerRepository) GetExpenseSummByPeriod(time *model.ExpensePeriod) (st
 
 	formattedResponse := fmt.Sprintf("Вы потратили - %d, Количество трат - %d", int(expenseSumm), int(expenseQuantity))
 	return formattedResponse, nil
+}
+
+func (r *BookerRepository) AddDeletedTime(itemId int) error {
+	var countedRows int
+
+	if err := r.store.db.QueryRow(
+		"SELECT COUNT(*) FROM book_daily_expense WHERE book_daily_expense.item_id =$1", itemId).
+		Scan(&countedRows); err != nil {
+		errors.New("failed to find item in book_cost_items")
+	}
+
+	if countedRows > 0 {
+		sqlStatment := "UPDATE book_daily_expense SET deleted_at =$1 WHERE item_id=$2"
+		_, err := r.store.db.Exec(sqlStatment, time.Now(), itemId)
+		if err != nil {
+			return errors.New("failed to update item_id")
+		}
+	}
+	return nil
 }
