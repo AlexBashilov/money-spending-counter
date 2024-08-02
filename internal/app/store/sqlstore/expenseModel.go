@@ -5,12 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"time"
 )
 
 func (r *BookerRepository) CreateExpense(u *model.UserExpense) error {
 	exists, _ := r.checkItemIsExist(u.Item)
-	fmt.Println(exists)
 	if exists == true {
 		return r.store.db.QueryRow(
 			"INSERT INTO book_daily_expense (amount, date, item) VALUES ($1, $2, $3) RETURNING id",
@@ -61,29 +59,28 @@ func (r *BookerRepository) GetExpenseByItem(itemID int) ([]map[string]interface{
 		colPtrs[i] = &cols[i]
 	}
 
-	var mySlice = make([]map[string]interface{}, 0)
+	var querySlice = make([]map[string]interface{}, 0)
 	for rows.Next() {
-		var myMap = make(map[string]interface{})
+		var queryMap = make(map[string]interface{})
 		err = rows.Scan(colPtrs...)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		for i, col := range cols {
-			myMap[colNames[i]] = col
+			queryMap[colNames[i]] = col
 		}
-		mySlice = append(mySlice, myMap)
+		querySlice = append(querySlice, queryMap)
 	}
-	return mySlice, nil
+	return querySlice, nil
 }
 
-func (r *BookerRepository) GeExpenseByDate(date time.Time) ([]map[string]interface{}, error) {
+func (r *BookerRepository) GeExpenseByDate(time *model.ExpensePeriod) ([]map[string]interface{}, error) {
 	rows, err := r.store.db.Query(
-		"SELECT id, amount, date, item FROM book_daily_expense WHERE date = $1", date)
+		"SELECT id, amount, date, item FROM book_daily_expense WHERE date >= $1 AND date <= $2", time.FromDate, time.ToDate)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	colNames, err := rows.Columns()
 	if err != nil {
 		log.Fatal(err)
@@ -94,18 +91,94 @@ func (r *BookerRepository) GeExpenseByDate(date time.Time) ([]map[string]interfa
 		colPtrs[i] = &cols[i]
 	}
 
-	var mySlice = make([]map[string]interface{}, 0)
+	var querySlice = make([]map[string]interface{}, 0)
 	for rows.Next() {
-		var myMap = make(map[string]interface{})
+		var queryMap = make(map[string]interface{})
 		err = rows.Scan(colPtrs...)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		for i, col := range cols {
-			myMap[colNames[i]] = col
+			queryMap[colNames[i]] = col
 		}
-		mySlice = append(mySlice, myMap)
+		querySlice = append(querySlice, queryMap)
 	}
-	return mySlice, nil
+	return querySlice, nil
+}
+
+func (r *BookerRepository) GeExpenseByItemAndDate(time *model.ExpensePeriod) ([]map[string]interface{}, error) {
+	rows, err := r.store.db.Query(
+		"SELECT id, amount, date, item FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND item = $3", time.FromDate, time.ToDate, time.Item)
+	if err != nil {
+		log.Fatal(err)
+	}
+	colNames, err := rows.Columns()
+	if err != nil {
+		log.Fatal(err)
+	}
+	cols := make([]interface{}, len(colNames))
+	colPtrs := make([]interface{}, len(colNames))
+	for i := 0; i < len(colNames); i++ {
+		colPtrs[i] = &cols[i]
+	}
+
+	var querySlice = make([]map[string]interface{}, 0)
+	for rows.Next() {
+		var queryMap = make(map[string]interface{})
+		err = rows.Scan(colPtrs...)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for i, col := range cols {
+			queryMap[colNames[i]] = col
+		}
+		querySlice = append(querySlice, queryMap)
+	}
+	return querySlice, nil
+}
+
+func (r *BookerRepository) GetExpenseSummByPeriodAndItem(time *model.ExpensePeriod) (string, error) {
+	var expenseSumm, expenseQuantity float64
+
+	if err := r.store.db.QueryRow(
+		"SELECT SUM(amount) FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND item = $3",
+		time.FromDate,
+		time.ToDate,
+		time.Item).Scan(&expenseSumm); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := r.store.db.QueryRow(
+		"SELECT count(*) item FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND item = $3",
+		time.FromDate,
+		time.ToDate,
+		time.Item).Scan(&expenseQuantity); err != nil {
+		log.Fatal(err)
+	}
+
+	formattedResponse := fmt.Sprintf("Вы потратили - %d, Количество трат - %d", int(expenseSumm), int(expenseQuantity))
+	return formattedResponse, nil
+}
+
+func (r *BookerRepository) GetExpenseSummByPeriod(time *model.ExpensePeriod) (string, error) {
+	var expenseSumm, expenseQuantity float64
+
+	if err := r.store.db.QueryRow(
+		"SELECT SUM(amount) FROM book_daily_expense WHERE date >= $1 AND date <= $2",
+		time.FromDate,
+		time.ToDate).Scan(&expenseSumm); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := r.store.db.QueryRow(
+		"SELECT count(*) item FROM book_daily_expense WHERE date >= $1 AND date <= $2",
+		time.FromDate,
+		time.ToDate).Scan(&expenseQuantity); err != nil {
+		log.Fatal(err)
+	}
+
+	formattedResponse := fmt.Sprintf("Вы потратили - %d, Количество трат - %d", int(expenseSumm), int(expenseQuantity))
+	return formattedResponse, nil
 }

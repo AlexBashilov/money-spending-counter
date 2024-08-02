@@ -22,6 +22,12 @@ type UserExpense struct {
 	ItemId int       `json:"item_id"`
 }
 
+type ExpensePeriod struct {
+	FromDate time.Time `json:"fromdate"`
+	ToDate   time.Time `json:"todate"`
+	Item     string    `json:"item"`
+}
+
 // /Validate ...
 func (u *UserCostItems) Validate() error {
 	return validation.ValidateStruct(
@@ -30,24 +36,3 @@ func (u *UserCostItems) Validate() error {
 		validation.Field(&u.Code, validation.Required),
 	)
 }
-
-//
-//// BeforeCreate ...
-//func (u *User) BeforeCreate() error {
-//	if len(u.Password) > 0 {
-//		enc, err := encryptString(u.Password)
-//		if err != nil {
-//			return err
-//		}
-//		u.EncryptedPassword = enc
-//	}
-//	return nil
-//}
-//
-//func encryptString(s string) (string, error) {
-//	b, err := bcrypt.GenerateFromPassword([]byte(s), bcrypt.MinCost)
-//	if err != nil {
-//		return "", err
-//	}
-//	return string(b), err
-//}

@@ -1,1 +1,0 @@
-DROP TABLE book_cost_items, book_daily_expense;
