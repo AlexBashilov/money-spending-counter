@@ -34,10 +34,6 @@ func (r *BookerRepository) GetAllItems() ([]map[string]interface{}, error) {
 		log.Fatal(err)
 	}
 
-	if rows == nil {
-		return nil, errors.New("No items found")
-	}
-
 	colNames, err := rows.Columns()
 	if err != nil {
 		log.Fatal(err)
