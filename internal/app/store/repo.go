@@ -18,4 +18,5 @@ type BookerRepository interface {
 	GetExpenseSummByPeriod(time *model.ExpensePeriod) (string, error)
 	AddDeletedTime(int) error
 	CheckItemIsExist(item string) (bool, error)
+	CheckItemIsExistByID(itemID int) (bool, error)
 }

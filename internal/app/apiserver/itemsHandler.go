@@ -96,11 +96,24 @@ func (s *server) handleGetItems(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-	if err := s.store.Booker().DeleteItems(itemID); err != nil {
-		s.error(w, r, http.StatusUnprocessableEntity, err)
+	itemExist, _ := s.store.Booker().CheckItemIsExistByID(itemID)
+	if itemExist == false {
+		respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
+			"item not found",
+			"item deleted or does not exist"})
+		return
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]string{"result": "item deleted"})
+	if err := s.store.Booker().DeleteItems(itemID); err != nil {
+		respondWithJSON(w, http.StatusUnprocessableEntity, respond.ErrorItemsResponse{
+			err.Error(),
+			"something went wrong"})
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+		"deleted",
+		fmt.Sprintf("item %d deleted successfully", itemID)})
 }
 
 // handleItemsUpdate UpdateItems    godoc
