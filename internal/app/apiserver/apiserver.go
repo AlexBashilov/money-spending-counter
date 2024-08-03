@@ -21,7 +21,7 @@ func Start(config *Config) error {
 
 	srv := newServer(store)
 
-	fmt.Println("Booker start =)")
+	fmt.Println("Booker started")
 
 	return http.ListenAndServe(config.BindAddr, srv)
 }

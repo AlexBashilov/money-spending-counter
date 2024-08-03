@@ -9,6 +9,19 @@ import (
 	"time"
 )
 
+// handleExpenseCreate Expense Create		godoc
+//
+//	@Summary		Expense Create
+//	@Description	Expense Create
+//	@Param			input	body	model.UserExpense	true	"Create expense"
+//	@Produce		application/json
+//	@Tags			expense
+//	@Success		201	{string}	response.Response{}
+//
+//	@Failure		422	{string}	response.Response{}
+//	@Failure		400	{string}	response.Response{}
+//
+//	@Router			/book_daily_expense/create [post]
 func (s *server) handleExpenseCreate() http.HandlerFunc {
 	type request struct {
 		Amount float32 `json:"amount"`
@@ -37,6 +50,19 @@ func (s *server) handleExpenseCreate() http.HandlerFunc {
 	}
 }
 
+// handleGetExpenseByItem  Get Expense By Item		godoc
+//
+//	@Summary		Get Expense By Item
+//	@Description	Get Expense By Item
+//
+//	@Param			id	path	string	true	"item id"
+//
+//	@Produce		application/json
+//	@Tags			expense
+//	@Success		200	{string}	response.Response{}
+//	@Failure		422	{string}	response.Response{}
+//
+//	@Router			/book_daily_expense/get_by_id/{id} [get]
 func (s *server) handleGetExpenseByItem(w http.ResponseWriter, r *http.Request) {
 	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
@@ -52,12 +78,14 @@ func (s *server) handleGetExpenseByItem(w http.ResponseWriter, r *http.Request) 
 //	@Summary		Get Expense By date
 //	@Description	Get Expense By date
 //
+// //	@Param			input	body	model.ExpensePeriod	true	"Expense period"
+//
 //	@Produce		application/json
 //	@Tags			expense
 //	@Success		200	{string}	response.Response{}
 //	@Failure		422	{string}	response.Response{}
 //
-//	@Router			/daily_expense/get_by_date [get]
+//	@Router			/book_daily_expense/get_by_date [get]
 func (s *server) handleGetExpenseByDate(w http.ResponseWriter, r *http.Request) {
 	type request struct {
 		FromDate time.Time `json:"from_date"`
@@ -80,6 +108,20 @@ func (s *server) handleGetExpenseByDate(w http.ResponseWriter, r *http.Request) 
 	respondWithJSON(w, http.StatusOK, res)
 }
 
+// handleGetExpenseByItemAndDate Get Expense Summ By Item and Date		godoc
+//
+//	@Summary		Get Expense Summ By Item and Date
+//	@Description	Get Expense Summ By Item and Date
+//
+//	@Produce		application/json
+//
+// //	@Param			input	body	model.ExpensePeriod	true	"Expense period"
+//
+//	@Tags			expense
+//	@Success		200	{string}	response.Response{}
+//	@Failure		422	{string}	response.Response{}
+//
+//	@Router			/book_daily_expense/get_by_date_and_item [get]
 func (s *server) handleGetExpenseByItemAndDate(w http.ResponseWriter, r *http.Request) {
 	type request struct {
 		FromDate time.Time `json:"from_date"`
@@ -104,6 +146,20 @@ func (s *server) handleGetExpenseByItemAndDate(w http.ResponseWriter, r *http.Re
 	respondWithJSON(w, http.StatusOK, res)
 }
 
+// handleGetExpenseSummByPeriod Get Expense Summ By Period		godoc
+//
+//	@Summary		Get Expense Summ By Period
+//	@Description	Get Expense Summ By Period
+//
+//	@Produce		application/json
+//
+// //	@Param			input	body	model.ExpensePeriod	true	"Expense period"
+//
+//	@Tags			expense
+//	@Success		200	{string}	response.Response{}
+//	@Failure		422	{string}	response.Response{}
+//
+//	@Router			/book_daily_expense/get_summ_by_period [get]
 func (s *server) handleGetExpenseSummByPeriod(w http.ResponseWriter, r *http.Request) {
 	type request struct {
 		FromDate time.Time `json:"from_date"`
