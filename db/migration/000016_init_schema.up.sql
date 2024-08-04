@@ -1,7 +1,7 @@
 CREATE TABLE book_cost_items (
                                  id BIGSERIAl NOT NULL PRIMARY KEY,
                                  item_name VARCHAR (30) NOT NULL unique ,
-                                 code INT unique,
+                                 guid VARCHAR unique,
                                  description VARCHAR,
                                  deleted_at timestamp
 );

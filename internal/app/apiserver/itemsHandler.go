@@ -6,6 +6,7 @@ import (
 	"booker/internal/app/model"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
@@ -28,13 +29,14 @@ import (
 //	@Router      /book_cost_items/create [post]
 func (s *server) HandleItemsCreate() http.HandlerFunc {
 	type Request struct {
-		ItemName    string `json:"item_name"`
-		Code        int    `json:"code"`
-		Description string `json:"description"`
+		ItemName    string    `json:"item_name"`
+		Guid        uuid.UUID `json:"guid"`
+		Description string    `json:"description"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := &Request{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
 				err.Error(),
 				"invalid (empty) request body"})
@@ -42,7 +44,7 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 		}
 		U := &model.UserCostItems{
 			ItemName:    req.ItemName,
-			Code:        req.Code,
+			Guid:        req.Guid,
 			Description: req.Description,
 		}
 		itemExist, _ := s.store.Booker().CheckExist(req.ItemName)
@@ -50,6 +52,14 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
 				"item exist",
 				fmt.Sprintf("added cost items has ununique name - %s", U.ItemName)})
+			return
+		}
+
+		guidExist, _ := s.store.Booker().CheckExist(req.Guid)
+		if guidExist == true {
+			respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
+				"guid exist",
+				"enter unique guid"})
 			return
 		}
 		if err := s.store.Booker().CreateItems(U); err != nil {
@@ -137,9 +147,9 @@ func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 //	@Router      /book_cost_items/update/{id} [post]
 func (s *server) handleItemsUpdate() http.HandlerFunc {
 	type request struct {
-		ItemName    string `json:"item_name"`
-		Code        int    `json:"code"`
-		Description string `json:"description"`
+		ItemName    string    `json:"item_name"`
+		Guid        uuid.UUID `json:"guid"`
+		Description string    `json:"description"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		eventID, _ := strconv.Atoi(mux.Vars(r)["id"])
@@ -164,7 +174,7 @@ func (s *server) handleItemsUpdate() http.HandlerFunc {
 
 		u := &model.UserCostItems{
 			ItemName:    req.ItemName,
-			Code:        req.Code,
+			Guid:        req.Guid,
 			Description: req.Description,
 		}
 

@@ -21,5 +21,3 @@ migrateup:
 
 migratedown:
 		migrate -path db/migration -database "postgresql://root:root@localhost:5433/booker?sslmode=disable" -verbose down
-
-

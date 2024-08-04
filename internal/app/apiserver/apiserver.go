@@ -10,6 +10,7 @@ import (
 )
 
 func Start(config *Config) error {
+
 	db, err := newDB(config.DataBaseURL)
 
 	if err != nil {
