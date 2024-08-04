@@ -79,7 +79,10 @@ func (s *server) handleGetItems(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.error(w, r, http.StatusUnprocessableEntity, err)
 	}
-	respondWithJSON(w, http.StatusOK, res)
+	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+		"success",
+		res})
+	return
 }
 
 // handleDeleteItems DeleteItems    godoc
@@ -198,7 +201,13 @@ func (s *server) handleGetOnlyOneItem(w http.ResponseWriter, r *http.Request) {
 		s.error(w, r, http.StatusInternalServerError, err)
 	}
 	if res == nil {
-		s.respond(w, r, http.StatusOK, err)
+		respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+			" not found",
+			"item not found, deleted or not exist"})
+		return
 	}
-	respondWithJSON(w, http.StatusOK, res)
+	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+		"success",
+		res})
+	return
 }
