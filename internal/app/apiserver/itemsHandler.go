@@ -45,7 +45,7 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 			Code:        req.Code,
 			Description: req.Description,
 		}
-		itemExist, _ := s.store.Booker().CheckItemIsExist(req.ItemName)
+		itemExist, _ := s.store.Booker().CheckExist(req.ItemName)
 		if itemExist == true {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
 				"item exist",
@@ -99,7 +99,7 @@ func (s *server) handleGetItems(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-	itemExist, _ := s.store.Booker().CheckItemIsExistByID(itemID)
+	itemExist, _ := s.store.Booker().CheckExist(itemID)
 	if itemExist == false {
 		respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
 			"item not found",
@@ -154,7 +154,7 @@ func (s *server) handleItemsUpdate() http.HandlerFunc {
 
 		}
 
-		itemExist, _ := s.store.Booker().CheckItemIsExistByID(eventID)
+		itemExist, _ := s.store.Booker().CheckExist(eventID)
 		if itemExist == false {
 			respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
 				"item not found",
