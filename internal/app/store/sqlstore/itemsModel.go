@@ -29,7 +29,7 @@ func (r *BookerRepository) CreateItems(u *model.UserCostItems) error {
 func (r *BookerRepository) GetAllItems() ([]map[string]interface{}, error) {
 
 	rows, err := r.store.db.Query(
-		"SELECT id, item_name, code, description FROM book_cost_items WHERE deleted_at IS NULL",
+		"SELECT id, item_name, guid, description FROM book_cost_items WHERE deleted_at IS NULL",
 	)
 	if err != nil {
 		log.Fatal(err)
