@@ -141,25 +141,40 @@ func (s *server) handleItemsUpdate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		eventID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-		if err := s.store.Booker().DeleteItems(eventID); err != nil {
-			s.error(w, r, http.StatusUnprocessableEntity, err)
-		}
 		req := &request{}
+
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				err.Error(),
+				"invalid (empty) request body"})
+			return
+
+		}
+
+		itemExist, _ := s.store.Booker().CheckItemIsExistByID(eventID)
+		if itemExist == false {
+			respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
+				"item not found",
+				"item deleted or does not exist"})
 			return
 		}
+
 		u := &model.UserCostItems{
 			ItemName:    req.ItemName,
 			Code:        req.Code,
 			Description: req.Description,
 		}
 
-		if err := s.store.Booker().CreateItems(u); err != nil {
-			s.error(w, r, http.StatusUnprocessableEntity, err)
+		if _, err := s.store.Booker().UpdateItems(u, eventID); err != nil {
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				err.Error(),
+				"invalid request body:required request fields not found"})
 			return
 		}
-		s.respond(w, r, http.StatusOK, map[string]string{"result": "item updated"})
+		respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+			" success",
+			"item updated successfully"})
+		return
 	}
 }
 

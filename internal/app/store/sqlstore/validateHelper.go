@@ -17,3 +17,12 @@ func (r *BookerRepository) CheckItemIsExistByID(itemID int) (bool, error) {
 	}
 	return exists, nil
 }
+
+func (r *BookerRepository) CheckItemIsExistByCode(code int) (bool, error) {
+	var exists bool
+	err := r.store.db.QueryRow("SELECT EXISTS(SELECT item_name FROM book_cost_items WHERE code = $1 AND deleted_at IS NULL)", code).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}

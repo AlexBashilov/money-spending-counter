@@ -9,6 +9,7 @@ type BookerRepository interface {
 	GetAllItems() ([]map[string]interface{}, error)
 	GetOnlyOneItem(id int) (*model.UserCostItems, error)
 	DeleteItems(id int) error
+	UpdateItems(u *model.UserCostItems, id int) (*model.UserCostItems, error)
 	CreateExpense(u *model.UserExpense) error
 	GetExpenseByItem(itemID int) ([]map[string]interface{}, error)
 	UpdateItemID(item string) error
@@ -19,4 +20,5 @@ type BookerRepository interface {
 	AddDeletedTime(int) error
 	CheckItemIsExist(item string) (bool, error)
 	CheckItemIsExistByID(itemID int) (bool, error)
+	CheckItemIsExistByCode(code int) (bool, error)
 }

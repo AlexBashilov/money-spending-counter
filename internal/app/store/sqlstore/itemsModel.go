@@ -97,3 +97,11 @@ func (r *BookerRepository) GetOnlyOneItem(itemId int) (*model.UserCostItems, err
 	}
 	return u, nil
 }
+
+func (r *BookerRepository) UpdateItems(u *model.UserCostItems, id int) (*model.UserCostItems, error) {
+	_, err := r.store.db.Exec("UPDATE public.book_cost_items SET item_name = $1, code=$2, description=$3 WHERE id = $4;", u.ItemName, u.Code, u.Description, id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return u, nil
+}
