@@ -1,9 +1,18 @@
 definitions:
+  model.ExpensePeriod:
+    properties:
+      fromdate:
+        type: string
+      item:
+        type: string
+      todate:
+        type: string
+    type: object
   model.UserCostItems:
     properties:
-      code:
-        type: integer
       description:
+        type: string
+      guid:
         type: string
       id:
         type: integer
@@ -37,9 +46,9 @@ paths:
     post:
       description: Create new items data in Db.
       parameters:
-      - description: Create items
+      - description: Query Params
         in: body
-        name: input
+        name: request
         required: true
         schema:
           $ref: '#/definitions/model.UserCostItems'
@@ -65,7 +74,7 @@ paths:
     delete:
       description: Delete items data from Db.
       parameters:
-      - description: ID
+      - description: Enter item_id
         in: path
         name: id
         required: true
@@ -105,7 +114,7 @@ paths:
     get:
       description: Get Items By Id
       parameters:
-      - description: item id
+      - description: Enter item_id
         in: path
         name: id
         required: true
@@ -128,17 +137,22 @@ paths:
     post:
       description: Update items data in Db.
       parameters:
-      - description: Items struct
+      - description: Enter id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: query params
         in: body
-        name: input
+        name: request
         required: true
         schema:
           $ref: '#/definitions/model.UserCostItems'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "20":
+          description: ""
           schema:
             type: string
         "400":
@@ -156,9 +170,9 @@ paths:
     post:
       description: Expense Create
       parameters:
-      - description: Create expense
+      - description: query params
         in: body
-        name: input
+        name: request
         required: true
         schema:
           $ref: '#/definitions/model.UserExpense'
@@ -180,26 +194,8 @@ paths:
       summary: Expense Create
       tags:
       - expense
-  /book_daily_expense/get_by_date:
-    get:
-      description: Get Expense By date
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-        "422":
-          description: Unprocessable Entity
-          schema:
-            type: string
-      summary: Get Expense By date
-      tags:
-      - expense
   /book_daily_expense/get_by_date_and_item:
     get:
-      description: Get Expense Summ By Item and Date
       produces:
       - application/json
       responses:
@@ -211,14 +207,13 @@ paths:
           description: Unprocessable Entity
           schema:
             type: string
-      summary: Get Expense Summ By Item and Date
       tags:
       - expense
   /book_daily_expense/get_by_id/{id}:
     get:
       description: Get Expense By Item
       parameters:
-      - description: item id
+      - description: enter item_id
         in: path
         name: id
         required: true
@@ -239,7 +234,6 @@ paths:
       - expense
   /book_daily_expense/get_summ_by_period:
     get:
-      description: Get Expense Summ By Period
       produces:
       - application/json
       responses:
@@ -251,7 +245,30 @@ paths:
           description: Unprocessable Entity
           schema:
             type: string
-      summary: Get Expense Summ By Period
+      tags:
+      - expense
+  /daily_expense/get_by_date:
+    get:
+      description: Get Expense By date
+      parameters:
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.ExpensePeriod'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+      summary: Get Expense By date
       tags:
       - expense
 swagger: "2.0"

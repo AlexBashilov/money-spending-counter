@@ -28,8 +28,8 @@ const docTemplate = `{
                 "summary": "Create items",
                 "parameters": [
                     {
-                        "description": "Create items",
-                        "name": "input",
+                        "description": "Query Params",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -72,7 +72,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID",
+                        "description": "Enter item_id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -133,7 +133,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "item id",
+                        "description": "Enter item_id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -167,8 +167,15 @@ const docTemplate = `{
                 "summary": "Update Items",
                 "parameters": [
                     {
-                        "description": "Items struct",
-                        "name": "input",
+                        "type": "string",
+                        "description": "Enter id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "query params",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -177,8 +184,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "20": {
+                        "description": "",
                         "schema": {
                             "type": "string"
                         }
@@ -210,8 +217,8 @@ const docTemplate = `{
                 "summary": "Expense Create",
                 "parameters": [
                     {
-                        "description": "Create expense",
-                        "name": "input",
+                        "description": "query params",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -241,42 +248,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/book_daily_expense/get_by_date": {
-            "get": {
-                "description": "Get Expense By date",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "expense"
-                ],
-                "summary": "Get Expense By date",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/book_daily_expense/get_by_date_and_item": {
             "get": {
-                "description": "Get Expense Summ By Item and Date",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "expense"
                 ],
-                "summary": "Get Expense Summ By Item and Date",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -306,7 +285,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "item id",
+                        "description": "enter item_id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -330,14 +309,49 @@ const docTemplate = `{
         },
         "/book_daily_expense/get_summ_by_period": {
             "get": {
-                "description": "Get Expense Summ By Period",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "expense"
                 ],
-                "summary": "Get Expense Summ By Period",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/daily_expense/get_by_date": {
+            "get": {
+                "description": "Get Expense By date",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Get Expense By date",
+                "parameters": [
+                    {
+                        "description": "query params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ExpensePeriod"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -356,13 +370,27 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.ExpensePeriod": {
+            "type": "object",
+            "properties": {
+                "fromdate": {
+                    "type": "string"
+                },
+                "item": {
+                    "type": "string"
+                },
+                "todate": {
+                    "type": "string"
+                }
+            }
+        },
         "model.UserCostItems": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "integer"
-                },
                 "description": {
+                    "type": "string"
+                },
+                "guid": {
                     "type": "string"
                 },
                 "id": {

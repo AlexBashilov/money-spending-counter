@@ -13,8 +13,7 @@ CREATE TABLE book_daily_expense (
                                     date timestamp,
                                     item VARCHAR REFERENCES book_cost_items (item_name) ON DELETE CASCADE,
                                     deleted_at timestamp
-
-                                );
+);
 
 ALTER TABLE book_daily_expense ADD item_id INTEGER;
 

@@ -14,19 +14,19 @@ import (
 
 // HandleItemsCreate CreateItems    godoc
 //
-//	@Summary    Create items
-//	@Description  Create new items data in Db.
+//	@Summary		Create items
+//	@Description	Create new items data in Db.
 //
-//	@Param      request  body  model.UserCostItems  true  "Query Params"
+//	@Param			request	body	model.UserCostItems	true	"Query Params"
 //
-//	@Produce    application/json
-//	@Tags      items
-//	@Success    201  {string}  response.Response{}
+//	@Produce		application/json
+//	@Tags			items
+//	@Success		201	{string}	response.Response{}
 //
-//	@Failure    422  {string}  response.Response{}
-//	@Failure    400  {string}  response.Response{}
+//	@Failure		422	{string}	response.Response{}
+//	@Failure		400	{string}	response.Response{}
 //
-//	@Router      /book_cost_items/create [post]
+//	@Router			/book_cost_items/create [post]
 func (s *server) HandleItemsCreate() http.HandlerFunc {
 	type Request struct {
 		ItemName    string    `json:"item_name"`
@@ -76,14 +76,14 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 
 // handleGetItems GetAllItems    godoc
 //
-//	@Summary    Get all items
-//	@Description  Get all items recorded to DB
-//	@Produce    application/json
-//	@Tags      items
-//	@Success    200  {string}  response.Response{}
-//	@Failure    422  {string}  response.Response{}
+//	@Summary		Get all items
+//	@Description	Get all items recorded to DB
+//	@Produce		application/json
+//	@Tags			items
+//	@Success		200	{string}	response.Response{}
+//	@Failure		422	{string}	response.Response{}
 //
-//	@Router      /book_cost_items/get_all [get]
+//	@Router			/book_cost_items/get_all [get]
 func (s *server) handleGetItems(w http.ResponseWriter, r *http.Request) {
 	res, err := s.store.Booker().GetAllItems()
 	if err != nil {
@@ -97,15 +97,15 @@ func (s *server) handleGetItems(w http.ResponseWriter, r *http.Request) {
 
 // handleDeleteItems DeleteItems    godoc
 //
-//	@Summary    Delete item by id
-//	@Description  Delete items data from Db.
-//	@Param      id  path  string  true  "Enter item_id"
-//	@Produce    application/json
-//	@Tags      items
-//	@Success    200  {string}  response.Response{}
-//	@Failure    422  {string}  response.Response{}
+//	@Summary		Delete item by id
+//	@Description	Delete items data from Db.
+//	@Param			id	path	string	true	"Enter item_id"
+//	@Produce		application/json
+//	@Tags			items
+//	@Success		200	{string}	response.Response{}
+//	@Failure		422	{string}	response.Response{}
 //
-//	@Router      /book_cost_items/delete/{id} [delete]
+//	@Router			/book_cost_items/delete/{id} [delete]
 func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
@@ -131,20 +131,20 @@ func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 
 // handleItemsUpdate UpdateItems    godoc
 //
-//	@Summary    Update Items
-//	@Description  Update items data in Db.
-//	@Produce    application/json
-//	@Tags      items
-//	@Param      id    path    string        true  "Enter id"
+//	@Summary		Update Items
+//	@Description	Update items data in Db.
+//	@Produce		application/json
+//	@Tags			items
+//	@Param			id		path		string				true	"Enter id"
 //
-//	@Param      request  body    model.UserCostItems  true  "query params"
+//	@Param			request	body		model.UserCostItems	true	"query params"
 //
-//	@Success    20    {string}  response.Response{}
+//	@Success		20		{string}	response.Response{}
 //
-//	@Failure    422    {string}  response.Response{}
-//	@Failure    400    {string}  response.Response{}
+//	@Failure		422		{string}	response.Response{}
+//	@Failure		400		{string}	response.Response{}
 //
-//	@Router      /book_cost_items/update/{id} [post]
+//	@Router			/book_cost_items/update/{id} [post]
 func (s *server) handleItemsUpdate() http.HandlerFunc {
 	type request struct {
 		ItemName    string    `json:"item_name"`
@@ -193,17 +193,17 @@ func (s *server) handleItemsUpdate() http.HandlerFunc {
 
 // handleGetOnlyOneItem GetItemsById    godoc
 //
-//	@Summary    Get Items By Id
-//	@Description  Get Items By Id
+//	@Summary		Get Items By Id
+//	@Description	Get Items By Id
 //
-//	@Param      id  path  string  true  "Enter item_id"
+//	@Param			id	path	string	true	"Enter item_id"
 //
-//	@Produce    application/json
-//	@Tags      items
-//	@Success    200  {string}  response.Response{}
-//	@Failure    422  {string}  response.Response{}
+//	@Produce		application/json
+//	@Tags			items
+//	@Success		200	{string}	response.Response{}
+//	@Failure		422	{string}	response.Response{}
 //
-//	@Router      /book_cost_items/get_only_one/{id} [get]
+//	@Router			/book_cost_items/get_only_one/{id} [get]
 func (s *server) handleGetOnlyOneItem(w http.ResponseWriter, r *http.Request) {
 	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
 	res, err := s.store.Booker().GetOnlyOneItem(itemID)
