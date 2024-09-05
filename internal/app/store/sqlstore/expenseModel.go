@@ -183,18 +183,18 @@ func (r *BookerRepository) GetExpenseSummByPeriod(time *model.ExpensePeriod) (st
 	return formattedResponse, nil
 }
 
-func (r *BookerRepository) AddDeletedTime(itemId int) error {
+func (r *BookerRepository) AddDeletedTime(itemID int) error {
 	var countedRows int
 
 	if err := r.store.db.QueryRow(
-		"SELECT COUNT(*) FROM book_daily_expense WHERE book_daily_expense.item_id =$1", itemId).
+		"SELECT COUNT(*) FROM book_daily_expense WHERE book_daily_expense.item_id =$1", itemID).
 		Scan(&countedRows); err != nil {
 		return err
 	}
 
 	if countedRows > 0 {
 		sqlStatment := "UPDATE book_daily_expense SET deleted_at =$1 WHERE item_id=$2"
-		_, err := r.store.db.Exec(sqlStatment, time.Now(), itemId)
+		_, err := r.store.db.Exec(sqlStatment, time.Now(), itemID)
 		if err != nil {
 			return errors.New("failed to update item_id")
 		}

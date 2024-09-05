@@ -10,7 +10,7 @@ import (
 type UserCostItems struct {
 	ID          int       `json:"id"`
 	ItemName    string    `json:"item_name"`
-	Guid        uuid.UUID `json:"guid"`
+	GUID        uuid.UUID `json:"guid"`
 	Description string    `json:"description"`
 }
 
@@ -20,7 +20,7 @@ type UserExpense struct {
 	Amount float32   `json:"amount"`
 	Date   time.Time `json:"date"`
 	Item   string    `json:"item"`
-	ItemId int       `json:"item_id"`
+	ItemID int       `json:"item_id"`
 }
 
 type ExpensePeriod struct {
@@ -34,6 +34,6 @@ func (u *UserCostItems) Validate() error {
 	return validation.ValidateStruct(
 		u,
 		validation.Field(&u.ItemName, validation.Required),
-		validation.Field(&u.Guid, validation.Required),
+		validation.Field(&u.GUID, validation.Required),
 	)
 }

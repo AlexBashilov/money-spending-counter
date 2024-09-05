@@ -21,7 +21,7 @@ func (r *BookerRepository) CreateItems(u *model.UserCostItems) error {
 	return r.store.db.QueryRow(
 		"INSERT INTO book_cost_items (item_name, guid, description) VALUES ($1, $2, $3) RETURNING id",
 		u.ItemName,
-		u.Guid,
+		u.GUID,
 		u.Description,
 	).Scan(&u.ID)
 }
@@ -73,7 +73,7 @@ func (r *BookerRepository) DeleteItems(id int) error {
 	return nil
 }
 
-func (r *BookerRepository) GetOnlyOneItem(itemId int) (*model.UserCostItems, error) {
+func (r *BookerRepository) GetOnlyOneItem(itemID int) (*model.UserCostItems, error) {
 	var id int
 	var itemName string
 	var guid uuid.UUID
@@ -82,16 +82,16 @@ func (r *BookerRepository) GetOnlyOneItem(itemId int) (*model.UserCostItems, err
 	u := &model.UserCostItems{
 		ID:          id,
 		ItemName:    itemName,
-		Guid:        guid,
+		GUID:        guid,
 		Description: description,
 	}
 	rows := r.store.db.QueryRow(
 		"SELECT id, item_name, guid, description FROM book_cost_items WHERE id = $1 AND deleted_at IS NULL",
-		itemId,
+		itemID,
 	).Scan(
 		&u.ID,
 		&u.ItemName,
-		&u.Guid,
+		&u.GUID,
 		&u.Description)
 	if errors.Is(rows, sql.ErrNoRows) {
 		return nil, nil
@@ -100,7 +100,7 @@ func (r *BookerRepository) GetOnlyOneItem(itemId int) (*model.UserCostItems, err
 }
 
 func (r *BookerRepository) UpdateItems(u *model.UserCostItems, id int) (*model.UserCostItems, error) {
-	_, err := r.store.db.Exec("UPDATE public.book_cost_items SET item_name = $1, guid=$2, description=$3 WHERE id = $4;", u.ItemName, u.Guid, u.Description, id)
+	_, err := r.store.db.Exec("UPDATE public.book_cost_items SET item_name = $1, guid=$2, description=$3 WHERE id = $4;", u.ItemName, u.GUID, u.Description, id)
 	if err != nil {
 		log.Fatal(err)
 	}

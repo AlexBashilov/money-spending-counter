@@ -32,7 +32,7 @@ import (
 func (s *server) HandleItemsCreate() http.HandlerFunc {
 	type Request struct {
 		ItemName    string    `json:"item_name"`
-		Guid        uuid.UUID `json:"guid"`
+		GUID        uuid.UUID `json:"guid"`
 		Description string    `json:"description"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +47,7 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 		}
 		U := &model.UserCostItems{
 			ItemName:    req.ItemName,
-			Guid:        req.Guid,
+			GUID:        req.GUID,
 			Description: req.Description,
 		}
 		itemExist, _ := s.store.Booker().CheckExist(req.ItemName)
@@ -58,7 +58,7 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 			return
 		}
 
-		guidExist, _ := s.store.Booker().CheckExist(req.Guid)
+		guidExist, _ := s.store.Booker().CheckExist(req.GUID)
 		if guidExist {
 			respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
 				Error:        "guid exist",
@@ -162,7 +162,7 @@ func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleItemsUpdate() http.HandlerFunc {
 	type request struct {
 		ItemName    string    `json:"item_name"`
-		Guid        uuid.UUID `json:"guid"`
+		GUID        uuid.UUID `json:"guid"`
 		Description string    `json:"description"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -188,7 +188,7 @@ func (s *server) handleItemsUpdate() http.HandlerFunc {
 
 		u := &model.UserCostItems{
 			ItemName:    req.ItemName,
-			Guid:        req.Guid,
+			GUID:        req.GUID,
 			Description: req.Description,
 		}
 
