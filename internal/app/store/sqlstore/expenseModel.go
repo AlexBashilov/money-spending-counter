@@ -201,3 +201,11 @@ func (r *BookerRepository) AddDeletedTime(itemId int) error {
 	}
 	return nil
 }
+
+func (r *BookerRepository) AddDeletedAt(id int) error {
+	_, err := r.store.db.Exec("UPDATE public.book_daily_expense SET deleted_at = $2 WHERE id = $1;", id, time.Now())
+	if err != nil {
+		log.Fatal(err)
+	}
+	return nil
+}

@@ -8,9 +8,14 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	oteltrace "go.opentelemetry.io/otel/trace"
 	"net/http"
 	"strconv"
 )
+
+var tracer oteltrace.Tracer
 
 // HandleItemsCreate CreateItems    godoc
 //
@@ -34,6 +39,7 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 		Description string    `json:"description"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		req := &Request{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 
@@ -85,13 +91,19 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 //
 //	@Router			/book_cost_items/get_all [get]
 func (s *server) handleGetItems(w http.ResponseWriter, r *http.Request) {
+
+	_, span := otel.Tracer("GetItems").Start(r.Context(), "firstspan")
+	defer span.End()
+
 	res, err := s.store.Booker().GetAllItems()
 	if err != nil {
 		s.error(w, r, http.StatusUnprocessableEntity, err)
+		span.SetAttributes(attribute.KeyValue{Key: "error", Value: attribute.StringValue(err.Error())})
 	}
 	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
 		"success",
 		res})
+
 	return
 }
 
@@ -123,6 +135,13 @@ func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 			"something went wrong"})
 		return
 	}
+	//expenseExist, _ := s.store.Booker().CheckExpenseExist(itemID)
+	//if expenseExist == true {
+	//	err := s.store.Booker().AddDeletedAt(itemID)
+	//	err != nil{
+	//		return err
+	//	}
+	//}
 
 	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
 		"deleted",

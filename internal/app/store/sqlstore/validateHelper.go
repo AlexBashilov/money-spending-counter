@@ -27,3 +27,12 @@ func (r *BookerRepository) CheckExist(comparisonSign interface{}) (bool, error) 
 		return false, nil
 	}
 }
+
+func (r *BookerRepository) CheckExpenseExist(comparisonSign interface{}) (bool, error) {
+	var exists bool
+	err := r.store.db.QueryRow("SELECT EXISTS(SELECT item_id FROM book_daily_expense WHERE item_id = $1 AND deleted_at IS NULL)", comparisonSign).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}

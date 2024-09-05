@@ -32,7 +32,6 @@ func newServer(store store.Store) *server {
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
-
 }
 
 func (s *server) configureRouter() {
