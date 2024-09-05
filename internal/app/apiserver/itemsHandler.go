@@ -51,7 +51,7 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 			Description: req.Description,
 		}
 		itemExist, _ := s.store.Booker().CheckExist(req.ItemName)
-		if itemExist == true {
+		if itemExist {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
 				Error:        "item exist",
 				ErrorDetails: fmt.Sprintf("added cost items has ununique name - %s", U.ItemName)})
@@ -59,7 +59,7 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 		}
 
 		guidExist, _ := s.store.Booker().CheckExist(req.Guid)
-		if guidExist == true {
+		if guidExist {
 			respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
 				Error:        "guid exist",
 				ErrorDetails: "enter unique guid"})
@@ -119,7 +119,7 @@ func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
 	itemExist, _ := s.store.Booker().CheckExist(itemID)
-	if itemExist == false {
+	if !itemExist {
 		respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
 			Error:        "item not found",
 			ErrorDetails: "item deleted or does not exist"})
@@ -181,7 +181,7 @@ func (s *server) handleItemsUpdate() http.HandlerFunc {
 		}
 
 		itemExist, _ := s.store.Booker().CheckExist(eventID)
-		if itemExist == false {
+		if !itemExist {
 			respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
 				Error:        "item not found",
 				ErrorDetails: "item deleted or does not exist"})
