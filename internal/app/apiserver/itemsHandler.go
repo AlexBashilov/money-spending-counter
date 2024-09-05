@@ -10,12 +10,9 @@ import (
 	"github.com/gorilla/mux"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	oteltrace "go.opentelemetry.io/otel/trace"
 	"net/http"
 	"strconv"
 )
-
-var tracer oteltrace.Tracer
 
 // HandleItemsCreate CreateItems    godoc
 //

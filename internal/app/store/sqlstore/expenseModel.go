@@ -10,7 +10,7 @@ import (
 
 func (r *BookerRepository) CreateExpense(u *model.UserExpense) error {
 	exists, _ := r.CheckExist(u.Item)
-	if exists == true {
+	if exists {
 		return r.store.db.QueryRow(
 			"INSERT INTO book_daily_expense (amount, date, item) VALUES ($1, $2, $3) RETURNING id",
 			u.Amount,
