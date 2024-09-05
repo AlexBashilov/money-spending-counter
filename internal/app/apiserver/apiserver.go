@@ -13,6 +13,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Start server
 func Start(config *Config) error {
 
 	db, err := newDB(config.DataBaseURL)
