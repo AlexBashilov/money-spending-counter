@@ -100,8 +100,6 @@ func (s *server) handleGetItems(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
 		Result:  "success",
 		Details: res})
-
-	return
 }
 
 // handleDeleteItems DeleteItems    godoc
@@ -203,7 +201,6 @@ func (s *server) handleItemsUpdate() http.HandlerFunc {
 		respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
 			Result:  " success",
 			Details: "item updated successfully"})
-		return
 	}
 }
 
@@ -235,5 +232,4 @@ func (s *server) handleGetOnlyOneItem(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
 		Result:  "success",
 		Details: res})
-	return
 }
