@@ -60,7 +60,7 @@ func (r *BookerRepository) GetAllItems() ([]map[string]interface{}, error) {
 	}
 
 	if len(mySlice) < 1 {
-		return nil, errors.New("No items found")
+		return nil, errors.New("no items found")
 	}
 	return mySlice, nil
 }

@@ -10,12 +10,9 @@ import (
 	"github.com/gorilla/mux"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	oteltrace "go.opentelemetry.io/otel/trace"
 	"net/http"
 	"strconv"
 )
-
-var tracer oteltrace.Tracer
 
 // HandleItemsCreate CreateItems    godoc
 //
@@ -44,8 +41,8 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
-				err.Error(),
-				"invalid (empty) request body"})
+				Error:        err.Error(),
+				ErrorDetails: "invalid (empty) request body"})
 			return
 		}
 		U := &model.UserCostItems{
@@ -54,29 +51,29 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 			Description: req.Description,
 		}
 		itemExist, _ := s.store.Booker().CheckExist(req.ItemName)
-		if itemExist == true {
+		if itemExist {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
-				"item exist",
-				fmt.Sprintf("added cost items has ununique name - %s", U.ItemName)})
+				Error:        "item exist",
+				ErrorDetails: fmt.Sprintf("added cost items has ununique name - %s", U.ItemName)})
 			return
 		}
 
 		guidExist, _ := s.store.Booker().CheckExist(req.Guid)
-		if guidExist == true {
+		if guidExist {
 			respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
-				"guid exist",
-				"enter unique guid"})
+				Error:        "guid exist",
+				ErrorDetails: "enter unique guid"})
 			return
 		}
 		if err := s.store.Booker().CreateItems(U); err != nil {
 			respondWithJSON(w, http.StatusUnprocessableEntity, respond.ErrorItemsResponse{
-				err.Error(),
-				"invalid request body:required request fields not found"})
+				Error:        err.Error(),
+				ErrorDetails: "invalid request body:required request fields not found"})
 			return
 		}
 		respondWithJSON(w, http.StatusCreated, respond.ItemsResponse{
-			fmt.Sprintf("item %s created with id - %d", U.ItemName, U.ID),
-			U})
+			Result:  fmt.Sprintf("item %s created with id - %d", U.ItemName, U.ID),
+			Details: U})
 	}
 }
 
@@ -101,10 +98,8 @@ func (s *server) handleGetItems(w http.ResponseWriter, r *http.Request) {
 		span.SetAttributes(attribute.KeyValue{Key: "error", Value: attribute.StringValue(err.Error())})
 	}
 	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
-		"success",
-		res})
-
-	return
+		Result:  "success",
+		Details: res})
 }
 
 // handleDeleteItems DeleteItems    godoc
@@ -122,17 +117,17 @@ func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
 	itemExist, _ := s.store.Booker().CheckExist(itemID)
-	if itemExist == false {
+	if !itemExist {
 		respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
-			"item not found",
-			"item deleted or does not exist"})
+			Error:        "item not found",
+			ErrorDetails: "item deleted or does not exist"})
 		return
 	}
 
 	if err := s.store.Booker().DeleteItems(itemID); err != nil {
 		respondWithJSON(w, http.StatusUnprocessableEntity, respond.ErrorItemsResponse{
-			err.Error(),
-			"something went wrong"})
+			Error:        err.Error(),
+			ErrorDetails: "something went wrong"})
 		return
 	}
 	//expenseExist, _ := s.store.Booker().CheckExpenseExist(itemID)
@@ -144,8 +139,8 @@ func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 	//}
 
 	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
-		"deleted",
-		fmt.Sprintf("item %d deleted successfully", itemID)})
+		Result:  "deleted",
+		Details: fmt.Sprintf("item %d deleted successfully", itemID)})
 }
 
 // handleItemsUpdate UpdateItems    godoc
@@ -177,17 +172,17 @@ func (s *server) handleItemsUpdate() http.HandlerFunc {
 
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
-				err.Error(),
-				"invalid (empty) request body"})
+				Error:        err.Error(),
+				ErrorDetails: "invalid (empty) request body"})
 			return
 
 		}
 
 		itemExist, _ := s.store.Booker().CheckExist(eventID)
-		if itemExist == false {
+		if !itemExist {
 			respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
-				"item not found",
-				"item deleted or does not exist"})
+				Error:        "item not found",
+				ErrorDetails: "item deleted or does not exist"})
 			return
 		}
 
@@ -199,14 +194,13 @@ func (s *server) handleItemsUpdate() http.HandlerFunc {
 
 		if _, err := s.store.Booker().UpdateItems(u, eventID); err != nil {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
-				err.Error(),
-				"invalid request body:required request fields not found"})
+				Error:        err.Error(),
+				ErrorDetails: "invalid request body:required request fields not found"})
 			return
 		}
 		respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
-			" success",
-			"item updated successfully"})
-		return
+			Result:  " success",
+			Details: "item updated successfully"})
 	}
 }
 
@@ -230,13 +224,12 @@ func (s *server) handleGetOnlyOneItem(w http.ResponseWriter, r *http.Request) {
 		s.error(w, r, http.StatusInternalServerError, err)
 	}
 	if res == nil {
-		respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
-			" not found",
-			"item not found, deleted or not exist"})
+		respondWithJSON(w, http.StatusBadRequest, respond.ItemsResponse{
+			Result:  " not found",
+			Details: "item not found, deleted or not exist"})
 		return
 	}
 	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
-		"success",
-		res})
-	return
+		Result:  "success",
+		Details: res})
 }

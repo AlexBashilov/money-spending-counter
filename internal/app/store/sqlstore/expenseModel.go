@@ -10,7 +10,7 @@ import (
 
 func (r *BookerRepository) CreateExpense(u *model.UserExpense) error {
 	exists, _ := r.CheckExist(u.Item)
-	if exists == true {
+	if exists {
 		return r.store.db.QueryRow(
 			"INSERT INTO book_daily_expense (amount, date, item) VALUES ($1, $2, $3) RETURNING id",
 			u.Amount,
@@ -31,13 +31,13 @@ func (r *BookerRepository) UpdateItemID(item string) error {
 		"SELECT id FROM book_cost_items WHERE item_name = $1",
 		item,
 	).Scan(&id); err != nil {
-		errors.New("failed to find item in book_cost_items")
+		return err
 	}
 
 	sqlStatment := "UPDATE book_daily_expense SET item_id =$1 WHERE item=$2"
 	_, err := r.store.db.Exec(sqlStatment, id, item)
 	if err != nil {
-		return errors.New("failed to update item_id")
+		return err
 	}
 	return nil
 }
@@ -189,7 +189,7 @@ func (r *BookerRepository) AddDeletedTime(itemId int) error {
 	if err := r.store.db.QueryRow(
 		"SELECT COUNT(*) FROM book_daily_expense WHERE book_daily_expense.item_id =$1", itemId).
 		Scan(&countedRows); err != nil {
-		errors.New("failed to find item in book_cost_items")
+		return err
 	}
 
 	if countedRows > 0 {
