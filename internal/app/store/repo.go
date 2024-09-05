@@ -9,6 +9,7 @@ type BookerRepository interface {
 	GetAllItems() ([]map[string]interface{}, error)
 	GetOnlyOneItem(id int) (*model.UserCostItems, error)
 	DeleteItems(id int) error
+	UpdateItems(u *model.UserCostItems, id int) (*model.UserCostItems, error)
 	CreateExpense(u *model.UserExpense) error
 	GetExpenseByItem(itemID int) ([]map[string]interface{}, error)
 	UpdateItemID(item string) error
@@ -16,4 +17,8 @@ type BookerRepository interface {
 	GeExpenseByItemAndDate(time *model.ExpensePeriod) ([]map[string]interface{}, error)
 	GetExpenseSummByPeriodAndItem(time *model.ExpensePeriod) (string, error)
 	GetExpenseSummByPeriod(time *model.ExpensePeriod) (string, error)
+	AddDeletedTime(int) error
+	CheckExist(comparisonSign interface{}) (bool, error)
+	CheckExpenseExist(comparisonSign interface{}) (bool, error)
+	AddDeletedAt(id int) error
 }

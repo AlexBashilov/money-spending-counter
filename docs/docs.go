@@ -16,7 +16,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/cost_items/create": {
+        "/book_cost_items/create": {
             "post": {
                 "description": "Create new items data in Db.",
                 "produces": [
@@ -28,8 +28,8 @@ const docTemplate = `{
                 "summary": "Create items",
                 "parameters": [
                     {
-                        "description": "Create items",
-                        "name": "input",
+                        "description": "Query Params",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -59,7 +59,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cost_items/delete/{id}": {
+        "/book_cost_items/delete/{id}": {
             "delete": {
                 "description": "Delete items data from Db.",
                 "produces": [
@@ -72,7 +72,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Delete Items by ID",
+                        "description": "Enter item_id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -94,7 +94,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cost_items/get_all": {
+        "/book_cost_items/get_all": {
             "get": {
                 "description": "Get all items recorded to DB",
                 "produces": [
@@ -120,7 +120,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cost_items/get_only_one/{id}": {
+        "/book_cost_items/get_only_one/{id}": {
             "get": {
                 "description": "Get Items By Id",
                 "produces": [
@@ -133,7 +133,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Get Items By Id",
+                        "description": "Enter item_id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -155,7 +155,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cost_items/update/{id}": {
+        "/book_cost_items/update/{id}": {
             "post": {
                 "description": "Update items data in Db.",
                 "produces": [
@@ -168,10 +168,19 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Update Items by ID",
+                        "description": "Enter id",
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "query params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UserCostItems"
+                        }
                     }
                 ],
                 "responses": {
@@ -196,6 +205,132 @@ const docTemplate = `{
                 }
             }
         },
+        "/book_daily_expense/create": {
+            "post": {
+                "description": "Expense Create",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Expense Create",
+                "parameters": [
+                    {
+                        "description": "query params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UserExpense"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/book_daily_expense/get_by_date_and_item": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/book_daily_expense/get_by_id/{id}": {
+            "get": {
+                "description": "Get Expense By Item",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Get Expense By Item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "enter item_id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/book_daily_expense/get_summ_by_period": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/daily_expense/get_by_date": {
             "get": {
                 "description": "Get Expense By date",
@@ -206,6 +341,17 @@ const docTemplate = `{
                     "expense"
                 ],
                 "summary": "Get Expense By date",
+                "parameters": [
+                    {
+                        "description": "query params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ExpensePeriod"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -224,13 +370,27 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.ExpensePeriod": {
+            "type": "object",
+            "properties": {
+                "fromdate": {
+                    "type": "string"
+                },
+                "item": {
+                    "type": "string"
+                },
+                "todate": {
+                    "type": "string"
+                }
+            }
+        },
         "model.UserCostItems": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "integer"
-                },
                 "description": {
+                    "type": "string"
+                },
+                "guid": {
                     "type": "string"
                 },
                 "id": {
@@ -238,6 +398,26 @@ const docTemplate = `{
                 },
                 "item_name": {
                     "type": "string"
+                }
+            }
+        },
+        "model.UserExpense": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "item": {
+                    "type": "string"
+                },
+                "item_id": {
+                    "type": "integer"
                 }
             }
         }

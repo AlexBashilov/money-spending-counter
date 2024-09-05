@@ -2,15 +2,16 @@ package model
 
 import (
 	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/google/uuid"
 	"time"
 )
 
 // Структура и описание статей затрат
 type UserCostItems struct {
-	ID          int    `json:"id"`
-	ItemName    string `json:"item_name"`
-	Code        int    `json:"code"`
-	Description string `json:"description"`
+	ID          int       `json:"id"`
+	ItemName    string    `json:"item_name"`
+	Guid        uuid.UUID `json:"guid"`
+	Description string    `json:"description"`
 }
 
 // Структура дневных затрат
@@ -33,6 +34,6 @@ func (u *UserCostItems) Validate() error {
 	return validation.ValidateStruct(
 		u,
 		validation.Field(&u.ItemName, validation.Required),
-		validation.Field(&u.Code, validation.Required),
+		validation.Field(&u.Guid, validation.Required),
 	)
 }

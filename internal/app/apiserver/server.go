@@ -6,20 +6,23 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"net/http"
 )
 
 type server struct {
-	router *mux.Router
-	logger *logrus.Logger
-	store  store.Store
+	router    *mux.Router
+	logger    *logrus.Logger
+	store     store.Store
+	Transport http.RoundTripper
 }
 
 func newServer(store store.Store) *server {
 	s := &server{
-		router: mux.NewRouter(),
-		logger: logrus.New(),
-		store:  store,
+		router:    mux.NewRouter(),
+		logger:    logrus.New(),
+		store:     store,
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
 	}
 
 	s.configureRouter()
@@ -29,7 +32,6 @@ func newServer(store store.Store) *server {
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
-
 }
 
 func (s *server) configureRouter() {

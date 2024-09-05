@@ -4,7 +4,9 @@ import (
 	"booker/internal/app/model"
 	"database/sql"
 	"errors"
+	"github.com/google/uuid"
 	"log"
+	"time"
 )
 
 type BookerRepository struct {
@@ -17,16 +19,17 @@ func (r *BookerRepository) CreateItems(u *model.UserCostItems) error {
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO book_cost_items (item_name, code, description) VALUES ($1, $2, $3) RETURNING id",
+		"INSERT INTO book_cost_items (item_name, guid, description) VALUES ($1, $2, $3) RETURNING id",
 		u.ItemName,
-		u.Code,
+		u.Guid,
 		u.Description,
 	).Scan(&u.ID)
 }
 
 func (r *BookerRepository) GetAllItems() ([]map[string]interface{}, error) {
+
 	rows, err := r.store.db.Query(
-		"SELECT id, item_name, code, description FROM book_cost_items",
+		"SELECT id, item_name, guid, description FROM book_cost_items WHERE deleted_at IS NULL",
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -55,11 +58,15 @@ func (r *BookerRepository) GetAllItems() ([]map[string]interface{}, error) {
 		}
 		mySlice = append(mySlice, myMap)
 	}
+
+	if len(mySlice) < 1 {
+		return nil, errors.New("No items found")
+	}
 	return mySlice, nil
 }
 
 func (r *BookerRepository) DeleteItems(id int) error {
-	_, err := r.store.db.Exec("DELETE FROM  public.book_cost_items WHERE id = $1;", id)
+	_, err := r.store.db.Exec("UPDATE public.book_cost_items SET deleted_at = $2 WHERE id = $1;", id, time.Now())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,25 +76,33 @@ func (r *BookerRepository) DeleteItems(id int) error {
 func (r *BookerRepository) GetOnlyOneItem(itemId int) (*model.UserCostItems, error) {
 	var id int
 	var itemName string
-	var code int
+	var guid uuid.UUID
 	var description string
 
 	u := &model.UserCostItems{
 		ID:          id,
 		ItemName:    itemName,
-		Code:        code,
+		Guid:        guid,
 		Description: description,
 	}
 	rows := r.store.db.QueryRow(
-		"SELECT id, item_name, code, description FROM book_cost_items WHERE id = $1 ",
+		"SELECT id, item_name, guid, description FROM book_cost_items WHERE id = $1 AND deleted_at IS NULL",
 		itemId,
 	).Scan(
 		&u.ID,
 		&u.ItemName,
-		&u.Code,
+		&u.Guid,
 		&u.Description)
 	if errors.Is(rows, sql.ErrNoRows) {
 		return nil, nil
+	}
+	return u, nil
+}
+
+func (r *BookerRepository) UpdateItems(u *model.UserCostItems, id int) (*model.UserCostItems, error) {
+	_, err := r.store.db.Exec("UPDATE public.book_cost_items SET item_name = $1, guid=$2, description=$3 WHERE id = $4;", u.ItemName, u.Guid, u.Description, id)
+	if err != nil {
+		log.Fatal(err)
 	}
 	return u, nil
 }

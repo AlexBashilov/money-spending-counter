@@ -2,14 +2,25 @@ package apiserver
 
 import (
 	"booker/internal/app/store/sqlstore"
+	"booker/internal/app/trace"
 	"database/sql"
 	"fmt"
+	"github.com/joho/godotenv"
+	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/lib/pq"
 )
 
+var (
+	serviceName  = os.Getenv("SERVICE_NAME")
+	collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	insecure     = os.Getenv("INSECURE_MODE")
+)
+
 func Start(config *Config) error {
+
 	db, err := newDB(config.DataBaseURL)
 
 	if err != nil {
@@ -19,9 +30,18 @@ func Start(config *Config) error {
 
 	store := sqlstore.New(db)
 
+	if err := godotenv.Load(".env"); err != nil {
+		log.Fatal("No .env file found")
+	}
+
+	_, err = trace.NewTracer(os.Getenv("SERVICE_NAME"), os.Getenv("OTLP_TRACE_ENDPOINT"))
+	if err != nil {
+		log.Fatalf("unable to initialize tracer provider due: %v", err)
+	}
+
 	srv := newServer(store)
 
-	fmt.Println("Booker start =)")
+	fmt.Println("Booker started")
 
 	return http.ListenAndServe(config.BindAddr, srv)
 }

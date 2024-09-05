@@ -2,18 +2,28 @@ package apiserver
 
 import (
 	_ "booker/docs"
+	respond "booker/internal/app/error"
 	"booker/internal/app/model"
 	"encoding/json"
+	"fmt"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	oteltrace "go.opentelemetry.io/otel/trace"
 	"net/http"
 	"strconv"
 )
 
-// HandleItemsCreate CreateItems		godoc
+var tracer oteltrace.Tracer
+
+// HandleItemsCreate CreateItems    godoc
 //
 //	@Summary		Create items
 //	@Description	Create new items data in Db.
-//	@Param			input	body	model.UserCostItems	true	"Create items"
+//
+//	@Param			request	body	model.UserCostItems	true	"Query Params"
+//
 //	@Produce		application/json
 //	@Tags			items
 //	@Success		201	{string}	response.Response{}
@@ -21,33 +31,56 @@ import (
 //	@Failure		422	{string}	response.Response{}
 //	@Failure		400	{string}	response.Response{}
 //
-//	@Router			/cost_items/create [post]
+//	@Router			/book_cost_items/create [post]
 func (s *server) HandleItemsCreate() http.HandlerFunc {
 	type Request struct {
-		ItemName    string `json:"item_name"`
-		Code        int    `json:"code"`
-		Description string `json:"description"`
+		ItemName    string    `json:"item_name"`
+		Guid        uuid.UUID `json:"guid"`
+		Description string    `json:"description"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		req := &Request{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
+
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				err.Error(),
+				"invalid (empty) request body"})
 			return
 		}
 		U := &model.UserCostItems{
 			ItemName:    req.ItemName,
-			Code:        req.Code,
+			Guid:        req.Guid,
 			Description: req.Description,
 		}
-		if err := s.store.Booker().CreateItems(U); err != nil {
-			s.error(w, r, http.StatusUnprocessableEntity, err)
+		itemExist, _ := s.store.Booker().CheckExist(req.ItemName)
+		if itemExist == true {
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				"item exist",
+				fmt.Sprintf("added cost items has ununique name - %s", U.ItemName)})
 			return
 		}
-		s.respond(w, r, http.StatusCreated, U)
+
+		guidExist, _ := s.store.Booker().CheckExist(req.Guid)
+		if guidExist == true {
+			respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
+				"guid exist",
+				"enter unique guid"})
+			return
+		}
+		if err := s.store.Booker().CreateItems(U); err != nil {
+			respondWithJSON(w, http.StatusUnprocessableEntity, respond.ErrorItemsResponse{
+				err.Error(),
+				"invalid request body:required request fields not found"})
+			return
+		}
+		respondWithJSON(w, http.StatusCreated, respond.ItemsResponse{
+			fmt.Sprintf("item %s created with id - %d", U.ItemName, U.ID),
+			U})
 	}
 }
 
-// handleGetItems GetAllItems		godoc
+// handleGetItems GetAllItems    godoc
 //
 //	@Summary		Get all items
 //	@Description	Get all items recorded to DB
@@ -56,93 +89,140 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 //	@Success		200	{string}	response.Response{}
 //	@Failure		422	{string}	response.Response{}
 //
-//	@Router			/cost_items/get_all [get]
+//	@Router			/book_cost_items/get_all [get]
 func (s *server) handleGetItems(w http.ResponseWriter, r *http.Request) {
+
+	_, span := otel.Tracer("GetItems").Start(r.Context(), "firstspan")
+	defer span.End()
+
 	res, err := s.store.Booker().GetAllItems()
 	if err != nil {
 		s.error(w, r, http.StatusUnprocessableEntity, err)
+		span.SetAttributes(attribute.KeyValue{Key: "error", Value: attribute.StringValue(err.Error())})
 	}
-	respondWithJSON(w, http.StatusOK, res)
+	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+		"success",
+		res})
+
+	return
 }
 
-// handleDeleteItems DeleteItems		godoc
+// handleDeleteItems DeleteItems    godoc
 //
 //	@Summary		Delete item by id
 //	@Description	Delete items data from Db.
-//	@Param			id	path	string	true	"Delete Items by ID"
+//	@Param			id	path	string	true	"Enter item_id"
 //	@Produce		application/json
 //	@Tags			items
 //	@Success		200	{string}	response.Response{}
 //	@Failure		422	{string}	response.Response{}
 //
-//	@Router			/cost_items/delete/{id} [delete]
+//	@Router			/book_cost_items/delete/{id} [delete]
 func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-	if err := s.store.Booker().DeleteItems(itemID); err != nil {
-		s.error(w, r, http.StatusUnprocessableEntity, err)
+	itemExist, _ := s.store.Booker().CheckExist(itemID)
+	if itemExist == false {
+		respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
+			"item not found",
+			"item deleted or does not exist"})
+		return
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]string{"result": "item deleted"})
+	if err := s.store.Booker().DeleteItems(itemID); err != nil {
+		respondWithJSON(w, http.StatusUnprocessableEntity, respond.ErrorItemsResponse{
+			err.Error(),
+			"something went wrong"})
+		return
+	}
+	//expenseExist, _ := s.store.Booker().CheckExpenseExist(itemID)
+	//if expenseExist == true {
+	//	err := s.store.Booker().AddDeletedAt(itemID)
+	//	err != nil{
+	//		return err
+	//	}
+	//}
+
+	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+		"deleted",
+		fmt.Sprintf("item %d deleted successfully", itemID)})
 }
 
-// handleItemsUpdate UpdateItems		godoc
+// handleItemsUpdate UpdateItems    godoc
 //
 //	@Summary		Update Items
 //	@Description	Update items data in Db.
 //	@Produce		application/json
 //	@Tags			items
-//	@Param			id	path		string	true	"Update Items by ID"
-//	@Success		20	{string}	response.Response{}
+//	@Param			id		path		string				true	"Enter id"
 //
-//	@Failure		422	{string}	response.Response{}
-//	@Failure		400	{string}	response.Response{}
+//	@Param			request	body		model.UserCostItems	true	"query params"
 //
-//	@Router			/cost_items/update/{id} [post]
+//	@Success		20		{string}	response.Response{}
+//
+//	@Failure		422		{string}	response.Response{}
+//	@Failure		400		{string}	response.Response{}
+//
+//	@Router			/book_cost_items/update/{id} [post]
 func (s *server) handleItemsUpdate() http.HandlerFunc {
 	type request struct {
-		ItemName    string `json:"item_name"`
-		Code        int    `json:"code"`
-		Description string `json:"description"`
+		ItemName    string    `json:"item_name"`
+		Guid        uuid.UUID `json:"guid"`
+		Description string    `json:"description"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		eventID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-		if err := s.store.Booker().DeleteItems(eventID); err != nil {
-			s.error(w, r, http.StatusUnprocessableEntity, err)
-		}
 		req := &request{}
+
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				err.Error(),
+				"invalid (empty) request body"})
+			return
+
+		}
+
+		itemExist, _ := s.store.Booker().CheckExist(eventID)
+		if itemExist == false {
+			respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
+				"item not found",
+				"item deleted or does not exist"})
 			return
 		}
+
 		u := &model.UserCostItems{
 			ItemName:    req.ItemName,
-			Code:        req.Code,
+			Guid:        req.Guid,
 			Description: req.Description,
 		}
 
-		if err := s.store.Booker().CreateItems(u); err != nil {
-			s.error(w, r, http.StatusUnprocessableEntity, err)
+		if _, err := s.store.Booker().UpdateItems(u, eventID); err != nil {
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				err.Error(),
+				"invalid request body:required request fields not found"})
 			return
 		}
-		s.respond(w, r, http.StatusOK, map[string]string{"result": "item updated"})
+		respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+			" success",
+			"item updated successfully"})
+		return
 	}
 }
 
-// handleGetOnlyOneItem GetItemsById		godoc
+// handleGetOnlyOneItem GetItemsById    godoc
 //
 //	@Summary		Get Items By Id
 //	@Description	Get Items By Id
 //
-//	@Param			id	path	string	true	"Get Items By Id"
+//	@Param			id	path	string	true	"Enter item_id"
 //
 //	@Produce		application/json
 //	@Tags			items
 //	@Success		200	{string}	response.Response{}
 //	@Failure		422	{string}	response.Response{}
 //
-//	@Router			/cost_items/get_only_one/{id} [get]
+//	@Router			/book_cost_items/get_only_one/{id} [get]
 func (s *server) handleGetOnlyOneItem(w http.ResponseWriter, r *http.Request) {
 	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
 	res, err := s.store.Booker().GetOnlyOneItem(itemID)
@@ -150,7 +230,13 @@ func (s *server) handleGetOnlyOneItem(w http.ResponseWriter, r *http.Request) {
 		s.error(w, r, http.StatusInternalServerError, err)
 	}
 	if res == nil {
-		s.respond(w, r, http.StatusOK, err)
+		respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+			" not found",
+			"item not found, deleted or not exist"})
+		return
 	}
-	respondWithJSON(w, http.StatusOK, res)
+	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+		"success",
+		res})
+	return
 }
