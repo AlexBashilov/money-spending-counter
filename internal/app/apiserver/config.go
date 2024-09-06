@@ -1,5 +1,6 @@
 package apiserver
 
+// Config struct
 type Config struct {
 	BindAddr    string `toml:"bind addr"`
 	LogLevel    string `toml:"log_level"`

@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// CreateExpense create expense
 func (r *BookerRepository) CreateExpense(u *model.UserExpense) error {
 	exists, _ := r.CheckExist(u.Item)
 	if exists {
@@ -24,6 +25,7 @@ func (r *BookerRepository) CreateExpense(u *model.UserExpense) error {
 	return errors.New("invalid item")
 }
 
+// UpdateItemID update item ID
 func (r *BookerRepository) UpdateItemID(item string) error {
 	var id int
 
@@ -42,6 +44,7 @@ func (r *BookerRepository) UpdateItemID(item string) error {
 	return nil
 }
 
+// GetExpenseByItem get expense by item
 func (r *BookerRepository) GetExpenseByItem(itemID int) ([]map[string]interface{}, error) {
 	rows, err := r.store.db.Query(
 		"SELECT item, amount, date FROM book_daily_expense WHERE item_id = $1 AND deleted_at IS NULL", itemID)
@@ -75,7 +78,8 @@ func (r *BookerRepository) GetExpenseByItem(itemID int) ([]map[string]interface{
 	return querySlice, nil
 }
 
-func (r *BookerRepository) GeExpenseByDate(time *model.ExpensePeriod) ([]map[string]interface{}, error) {
+// GetExpenseByDate get expense by date
+func (r *BookerRepository) GetExpenseByDate(time *model.ExpensePeriod) ([]map[string]interface{}, error) {
 	rows, err := r.store.db.Query(
 		"SELECT id, amount, date, item FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND deleted_at IS NULL", time.FromDate, time.ToDate)
 	if err != nil {
@@ -107,7 +111,8 @@ func (r *BookerRepository) GeExpenseByDate(time *model.ExpensePeriod) ([]map[str
 	return querySlice, nil
 }
 
-func (r *BookerRepository) GeExpenseByItemAndDate(time *model.ExpensePeriod) ([]map[string]interface{}, error) {
+// GetExpenseByItemAndDate get expense by item and date
+func (r *BookerRepository) GetExpenseByItemAndDate(time *model.ExpensePeriod) ([]map[string]interface{}, error) {
 	rows, err := r.store.db.Query(
 		"SELECT id, amount, date, item FROM book_daily_expense WHERE date >= $1 AND date <= $2 AND item = $3 AND deleted_at IS NULL", time.FromDate, time.ToDate, time.Item)
 	if err != nil {
@@ -139,6 +144,7 @@ func (r *BookerRepository) GeExpenseByItemAndDate(time *model.ExpensePeriod) ([]
 	return querySlice, nil
 }
 
+// GetExpenseSummByPeriodAndItem get summ by period
 func (r *BookerRepository) GetExpenseSummByPeriodAndItem(time *model.ExpensePeriod) (string, error) {
 	var expenseSumm, expenseQuantity float64
 
@@ -162,6 +168,7 @@ func (r *BookerRepository) GetExpenseSummByPeriodAndItem(time *model.ExpensePeri
 	return formattedResponse, nil
 }
 
+// GetExpenseSummByPeriod get expense by period
 func (r *BookerRepository) GetExpenseSummByPeriod(time *model.ExpensePeriod) (string, error) {
 	var expenseSumm, expenseQuantity float64
 
@@ -183,18 +190,19 @@ func (r *BookerRepository) GetExpenseSummByPeriod(time *model.ExpensePeriod) (st
 	return formattedResponse, nil
 }
 
-func (r *BookerRepository) AddDeletedTime(itemId int) error {
+// AddDeletedTime Add time to DB
+func (r *BookerRepository) AddDeletedTime(itemID int) error {
 	var countedRows int
 
 	if err := r.store.db.QueryRow(
-		"SELECT COUNT(*) FROM book_daily_expense WHERE book_daily_expense.item_id =$1", itemId).
+		"SELECT COUNT(*) FROM book_daily_expense WHERE book_daily_expense.item_id =$1", itemID).
 		Scan(&countedRows); err != nil {
 		return err
 	}
 
 	if countedRows > 0 {
 		sqlStatment := "UPDATE book_daily_expense SET deleted_at =$1 WHERE item_id=$2"
-		_, err := r.store.db.Exec(sqlStatment, time.Now(), itemId)
+		_, err := r.store.db.Exec(sqlStatment, time.Now(), itemID)
 		if err != nil {
 			return errors.New("failed to update item_id")
 		}
@@ -202,6 +210,7 @@ func (r *BookerRepository) AddDeletedTime(itemId int) error {
 	return nil
 }
 
+// AddDeletedAt Add date to DB
 func (r *BookerRepository) AddDeletedAt(id int) error {
 	_, err := r.store.db.Exec("UPDATE public.book_daily_expense SET deleted_at = $2 WHERE id = $1;", id, time.Now())
 	if err != nil {

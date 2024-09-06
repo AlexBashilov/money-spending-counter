@@ -10,9 +10,10 @@ import (
 	"net/http"
 	"os"
 
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // pq lib import
 )
 
+// Start server
 func Start(config *Config) error {
 
 	db, err := newDB(config.DataBaseURL)

@@ -1,7 +1,7 @@
 package apiserver
 
 import (
-	_ "booker/docs"
+	_ "booker/docs" // swagger docs
 	"booker/internal/app/store"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"

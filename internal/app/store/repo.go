@@ -4,6 +4,7 @@ import (
 	"booker/internal/app/model"
 )
 
+// BookerRepository interface
 type BookerRepository interface {
 	CreateItems(items *model.UserCostItems) error
 	GetAllItems() ([]map[string]interface{}, error)
@@ -13,12 +14,11 @@ type BookerRepository interface {
 	CreateExpense(u *model.UserExpense) error
 	GetExpenseByItem(itemID int) ([]map[string]interface{}, error)
 	UpdateItemID(item string) error
-	GeExpenseByDate(period *model.ExpensePeriod) ([]map[string]interface{}, error)
-	GeExpenseByItemAndDate(time *model.ExpensePeriod) ([]map[string]interface{}, error)
+	GetExpenseByDate(period *model.ExpensePeriod) ([]map[string]interface{}, error)
+	GetExpenseByItemAndDate(time *model.ExpensePeriod) ([]map[string]interface{}, error)
 	GetExpenseSummByPeriodAndItem(time *model.ExpensePeriod) (string, error)
 	GetExpenseSummByPeriod(time *model.ExpensePeriod) (string, error)
 	AddDeletedTime(int) error
 	CheckExist(comparisonSign interface{}) (bool, error)
-	CheckExpenseExist(comparisonSign interface{}) (bool, error)
 	AddDeletedAt(id int) error
 }
