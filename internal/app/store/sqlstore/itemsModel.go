@@ -9,10 +9,12 @@ import (
 	"time"
 )
 
+// BookerRepository initial repo
 type BookerRepository struct {
 	store *Store
 }
 
+// CreateItems create item in DB
 func (r *BookerRepository) CreateItems(u *model.UserCostItems) error {
 	if err := u.Validate(); err != nil {
 		return err
@@ -26,6 +28,7 @@ func (r *BookerRepository) CreateItems(u *model.UserCostItems) error {
 	).Scan(&u.ID)
 }
 
+// GetAllItems get all items
 func (r *BookerRepository) GetAllItems() ([]map[string]interface{}, error) {
 
 	rows, err := r.store.db.Query(
@@ -65,6 +68,7 @@ func (r *BookerRepository) GetAllItems() ([]map[string]interface{}, error) {
 	return mySlice, nil
 }
 
+// DeleteItems delete items
 func (r *BookerRepository) DeleteItems(id int) error {
 	_, err := r.store.db.Exec("UPDATE public.book_cost_items SET deleted_at = $2 WHERE id = $1;", id, time.Now())
 	if err != nil {
@@ -73,6 +77,7 @@ func (r *BookerRepository) DeleteItems(id int) error {
 	return nil
 }
 
+// GetOnlyOneItem get items by ID
 func (r *BookerRepository) GetOnlyOneItem(itemID int) (*model.UserCostItems, error) {
 	var id int
 	var itemName string
@@ -99,6 +104,7 @@ func (r *BookerRepository) GetOnlyOneItem(itemID int) (*model.UserCostItems, err
 	return u, nil
 }
 
+// UpdateItems update items in DB
 func (r *BookerRepository) UpdateItems(u *model.UserCostItems, id int) (*model.UserCostItems, error) {
 	_, err := r.store.db.Exec("UPDATE public.book_cost_items SET item_name = $1, guid=$2, description=$3 WHERE id = $4;", u.ItemName, u.GUID, u.Description, id)
 	if err != nil {
