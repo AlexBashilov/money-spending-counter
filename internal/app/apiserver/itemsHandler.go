@@ -173,7 +173,7 @@ func (s *server) handleItemsUpdate() http.HandlerFunc {
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
 				Error:        err.Error(),
-				ErrorDetails: "invalid (empty) request body"})
+				ErrorDetails: "invalid request body"})
 			return
 
 		}
@@ -195,7 +195,7 @@ func (s *server) handleItemsUpdate() http.HandlerFunc {
 		if _, err := s.store.Booker().UpdateItems(u, eventID); err != nil {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
 				Error:        err.Error(),
-				ErrorDetails: "invalid request body:required request fields not found"})
+				ErrorDetails: "can not update item. contact technical support"})
 			return
 		}
 		respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
