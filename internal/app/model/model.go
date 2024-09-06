@@ -23,6 +23,7 @@ type UserExpense struct {
 	ItemID int       `json:"item_id"`
 }
 
+// ExpensePeriod struct
 type ExpensePeriod struct {
 	FromDate time.Time `json:"fromdate"`
 	ToDate   time.Time `json:"todate"`

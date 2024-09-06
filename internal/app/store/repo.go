@@ -4,6 +4,7 @@ import (
 	"booker/internal/app/model"
 )
 
+// BookerRepository interface
 type BookerRepository interface {
 	CreateItems(items *model.UserCostItems) error
 	GetAllItems() ([]map[string]interface{}, error)

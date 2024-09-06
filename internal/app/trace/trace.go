@@ -16,6 +16,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+// NewTracer init tracer
 func NewTracer(svcName string, url string) (trace.Tracer, error) {
 	_, err := stdout.New(stdout.WithPrettyPrint())
 	if err != nil {
