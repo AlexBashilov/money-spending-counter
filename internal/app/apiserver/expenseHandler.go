@@ -1,8 +1,11 @@
 package apiserver
 
 import (
+	respond "booker/internal/app/error"
 	"booker/internal/app/model"
 	"encoding/json"
+	"fmt"
+	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
@@ -24,14 +27,13 @@ import (
 //
 //	@Router			/book_daily_expense/create [post]
 func (s *server) handleExpenseCreate() http.HandlerFunc {
-	type request struct {
-		Amount float32 `json:"amount"`
-		Item   string  `json:"item"`
-	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		req := &request{}
+		req := &model.CreateExpenseRequest{}
+
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				Error:        err.Error(),
+				ErrorDetails: "invalid request body"})
 			return
 		}
 		u := &model.UserExpense{
@@ -39,6 +41,25 @@ func (s *server) handleExpenseCreate() http.HandlerFunc {
 			Item:   req.Item,
 			Date:   time.Now(),
 		}
+
+		// вынести в отделбный пакет Utils. создать под каждый запрос структуры в отдельноп пакете
+		validate := validator.New()
+		err := validate.Struct(req)
+		if err != nil {
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				Error:        err.Error(),
+				ErrorDetails: "missing required field"})
+			return
+		}
+
+		itemExist, _ := s.store.Booker().CheckExist(req.Item)
+		if !itemExist {
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				Error:        "item not found",
+				ErrorDetails: fmt.Sprintf("item %s not found or does not exist", u.Item)})
+			return
+		}
+
 		if err := s.store.Booker().CreateExpense(u); err != nil {
 			s.error(w, r, http.StatusUnprocessableEntity, err)
 			return

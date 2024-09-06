@@ -39,10 +39,9 @@ func (s *server) HandleItemsCreate() http.HandlerFunc {
 
 		req := &Request{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
 				Error:        err.Error(),
-				ErrorDetails: "invalid (empty) request body"})
+				ErrorDetails: "invalid request body"})
 			return
 		}
 		U := &model.UserCostItems{
