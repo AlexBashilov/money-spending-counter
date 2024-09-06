@@ -1,7 +1,7 @@
 package apiserver
 
 import (
-	_ "booker/docs"
+	_ "booker/docs" // swagger docs
 	respond "booker/internal/app/error"
 	"booker/internal/app/model"
 	"encoding/json"
