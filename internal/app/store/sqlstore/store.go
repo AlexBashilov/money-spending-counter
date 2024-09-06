@@ -18,6 +18,7 @@ func New(db *sql.DB) *Store {
 	}
 }
 
+// Booker init repo
 func (s *Store) Booker() store.BookerRepository {
 	if s.bookerRepository != nil {
 		return s.bookerRepository

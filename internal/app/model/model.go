@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Структура и описание статей затрат
+// UserCostItems struct items
 type UserCostItems struct {
 	ID          int       `json:"id"`
 	ItemName    string    `json:"item_name"`
@@ -14,7 +14,7 @@ type UserCostItems struct {
 	Description string    `json:"description"`
 }
 
-// Структура дневных затрат
+// UserExpense struct expense
 type UserExpense struct {
 	ID     int       `json:"id"`
 	Amount float32   `json:"amount"`
@@ -29,7 +29,7 @@ type ExpensePeriod struct {
 	Item     string    `json:"item"`
 }
 
-// /Validate ...
+// Validate field
 func (u *UserCostItems) Validate() error {
 	return validation.ValidateStruct(
 		u,
