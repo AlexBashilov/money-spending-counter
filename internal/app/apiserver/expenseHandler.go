@@ -102,7 +102,7 @@ func (s *server) handleGetExpenseByDate(w http.ResponseWriter, r *http.Request) 
 		FromDate: req.FromDate,
 		ToDate:   req.ToDate,
 	}
-	res, err := s.store.Booker().GeExpenseByDate(formattedTime)
+	res, err := s.store.Booker().GetExpenseByDate(formattedTime)
 	if err != nil {
 		s.error(w, r, http.StatusUnprocessableEntity, err)
 	}
@@ -138,7 +138,7 @@ func (s *server) handleGetExpenseByItemAndDate(w http.ResponseWriter, r *http.Re
 		ToDate:   req.ToDate,
 		Item:     req.Item,
 	}
-	res, err := s.store.Booker().GeExpenseByItemAndDate(timeAndExpense)
+	res, err := s.store.Booker().GetExpenseByItemAndDate(timeAndExpense)
 	if err != nil {
 		s.error(w, r, http.StatusUnprocessableEntity, err)
 	}

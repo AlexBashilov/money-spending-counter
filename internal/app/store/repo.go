@@ -13,8 +13,8 @@ type BookerRepository interface {
 	CreateExpense(u *model.UserExpense) error
 	GetExpenseByItem(itemID int) ([]map[string]interface{}, error)
 	UpdateItemID(item string) error
-	GeExpenseByDate(period *model.ExpensePeriod) ([]map[string]interface{}, error)
-	GeExpenseByItemAndDate(time *model.ExpensePeriod) ([]map[string]interface{}, error)
+	GetExpenseByDate(period *model.ExpensePeriod) ([]map[string]interface{}, error)
+	GetExpenseByItemAndDate(time *model.ExpensePeriod) ([]map[string]interface{}, error)
 	GetExpenseSummByPeriodAndItem(time *model.ExpensePeriod) (string, error)
 	GetExpenseSummByPeriod(time *model.ExpensePeriod) (string, error)
 	AddDeletedTime(int) error
