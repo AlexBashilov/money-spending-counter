@@ -106,13 +106,21 @@ func (s *server) handleGetExpenseByItem(w http.ResponseWriter, r *http.Request) 
 //
 //	@Router			/daily_expense/get_by_date [get]
 func (s *server) handleGetExpenseByDate(w http.ResponseWriter, r *http.Request) {
-	type request struct {
-		FromDate time.Time `json:"from_date"`
-		ToDate   time.Time `json:"to_date"`
-	}
-	req := &request{}
+
+	req := &model.GetExpenseByDateRequest{}
+
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		s.error(w, r, http.StatusBadRequest, err)
+		respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+			Error:        "invalid request body",
+			ErrorDetails: err.Error()})
+		return
+	}
+
+	err := validate.Struct(req)
+	if err != nil {
+		respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+			Error:        "missing required field",
+			ErrorDetails: err.Error()})
 		return
 	}
 
@@ -140,12 +148,7 @@ func (s *server) handleGetExpenseByDate(w http.ResponseWriter, r *http.Request) 
 //
 // @Router		/book_daily_expense/get_by_date_and_item [get]
 func (s *server) handleGetExpenseByItemAndDate(w http.ResponseWriter, r *http.Request) {
-	type request struct {
-		FromDate time.Time `json:"from_date"`
-		ToDate   time.Time `json:"to_date"`
-		Item     string    `json:"item"`
-	}
-	req := &request{}
+	req := &model.ExpenseItemDateRequest{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		s.error(w, r, http.StatusBadRequest, err)
 		return
@@ -176,12 +179,7 @@ func (s *server) handleGetExpenseByItemAndDate(w http.ResponseWriter, r *http.Re
 //
 // @Router		/book_daily_expense/get_summ_by_period [get]
 func (s *server) handleGetExpenseSummByPeriod(w http.ResponseWriter, r *http.Request) {
-	type request struct {
-		FromDate time.Time `json:"from_date"`
-		ToDate   time.Time `json:"to_date"`
-		Item     string    `json:"item"`
-	}
-	req := &request{}
+	req := &model.ExpenseItemDateRequest{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		s.error(w, r, http.StatusBadRequest, err)
 		return
