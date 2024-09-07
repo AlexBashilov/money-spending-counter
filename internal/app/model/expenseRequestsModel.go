@@ -14,7 +14,7 @@ type GetExpenseByDateRequest struct {
 	ToDate   time.Time `json:"to_date" validate:"required"`
 }
 
-// GetExpenseByItemAndDateRequest struct
+// ExpenseItemDateRequest struct
 type ExpenseItemDateRequest struct {
 	FromDate time.Time `json:"from_date" validate:"required"`
 	ToDate   time.Time `json:"to_date" validate:"required"`
