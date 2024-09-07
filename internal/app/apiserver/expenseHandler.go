@@ -5,7 +5,6 @@ import (
 	"booker/internal/app/model"
 	"encoding/json"
 	"fmt"
-	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
@@ -32,8 +31,8 @@ func (s *server) handleExpenseCreate() http.HandlerFunc {
 
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
-				Error:        err.Error(),
-				ErrorDetails: "invalid request body"})
+				Error:        "invalid request body",
+				ErrorDetails: err.Error()})
 			return
 		}
 		u := &model.UserExpense{
@@ -42,13 +41,11 @@ func (s *server) handleExpenseCreate() http.HandlerFunc {
 			Date:   time.Now(),
 		}
 
-		// вынести в отделбный пакет Utils. создать под каждый запрос структуры в отдельноп пакете
-		validate := validator.New()
 		err := validate.Struct(req)
 		if err != nil {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
-				Error:        err.Error(),
-				ErrorDetails: "missing required field"})
+				Error:        "missing required field",
+				ErrorDetails: err.Error()})
 			return
 		}
 
