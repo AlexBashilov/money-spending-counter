@@ -3,6 +3,7 @@ package apiserver
 import (
 	"booker/internal/app/store/sqlstore"
 	"booker/internal/app/trace"
+	"booker/utils/validator"
 	"database/sql"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -12,6 +13,8 @@ import (
 
 	_ "github.com/lib/pq" // pq lib import
 )
+
+var validate = validator.InitValidator()
 
 // Start server
 func Start(config *Config) error {
