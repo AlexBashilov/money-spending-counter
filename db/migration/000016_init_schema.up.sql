@@ -11,7 +11,7 @@ CREATE TABLE book_daily_expense (
                                     id BIGSERIAl NOT NULL PRIMARY KEY,
                                     amount FLOAT NOT NULL,
                                     date timestamp,
-                                    item VARCHAR REFERENCES book_cost_items (item_name) ON DELETE CASCADE,
+                                    item VARCHAR,
                                     deleted_at timestamp
 );
 
