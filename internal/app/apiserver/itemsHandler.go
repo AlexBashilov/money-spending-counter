@@ -6,7 +6,6 @@ import (
 	"booker/internal/app/model"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -19,7 +18,7 @@ import (
 //	@Summary		Create items
 //	@Description	Create new items data in Db.
 //
-//	@Param			request	body	model.UserCostItems	true	"Query Params"
+//	@Param			request	body	model.CreateItemsRequest	true	"Query Params"
 //
 //	@Produce		application/json
 //	@Tags			items
@@ -30,14 +29,10 @@ import (
 //
 //	@Router			/book_cost_items/create [post]
 func (s *server) HandleItemsCreate() http.HandlerFunc {
-	type Request struct {
-		ItemName    string    `json:"item_name"`
-		GUID        uuid.UUID `json:"guid"`
-		Description string    `json:"description"`
-	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		req := &Request{}
+		req := &model.CreateItemsRequest{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
 				Error:        err.Error(),
@@ -148,9 +143,9 @@ func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 //	@Description	Update items data in Db.
 //	@Produce		application/json
 //	@Tags			items
-//	@Param			id		path		string				true	"Enter id"
+//	@Param			id		path		string						true	"Enter id"
 //
-//	@Param			request	body		model.UserCostItems	true	"query params"
+//	@Param			request	body		model.CreateItemsRequest	true	"query params"
 //
 //	@Success		20		{string}	response.Response{}
 //
@@ -159,15 +154,10 @@ func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
 //
 //	@Router			/book_cost_items/update/{id} [post]
 func (s *server) handleItemsUpdate() http.HandlerFunc {
-	type request struct {
-		ItemName    string    `json:"item_name"`
-		GUID        uuid.UUID `json:"guid"`
-		Description string    `json:"description"`
-	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		eventID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-		req := &request{}
+		req := &model.CreateItemsRequest{}
 
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{

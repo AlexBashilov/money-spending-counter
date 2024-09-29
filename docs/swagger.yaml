@@ -1,4 +1,17 @@
 definitions:
+  model.CreateItemsRequest:
+    properties:
+      description:
+        type: string
+      guid:
+        type: string
+      item_name:
+        type: string
+    required:
+    - description
+    - guid
+    - item_name
+    type: object
   model.ExpensePeriod:
     properties:
       fromdate:
@@ -6,17 +19,6 @@ definitions:
       item:
         type: string
       todate:
-        type: string
-    type: object
-  model.UserCostItems:
-    properties:
-      description:
-        type: string
-      guid:
-        type: string
-      id:
-        type: integer
-      item_name:
         type: string
     type: object
   model.UserExpense:
@@ -51,7 +53,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/model.UserCostItems'
+          $ref: '#/definitions/model.CreateItemsRequest'
       produces:
       - application/json
       responses:
@@ -147,7 +149,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/model.UserCostItems'
+          $ref: '#/definitions/model.CreateItemsRequest'
       produces:
       - application/json
       responses:

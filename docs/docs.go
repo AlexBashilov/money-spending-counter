@@ -33,7 +33,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.UserCostItems"
+                            "$ref": "#/definitions/model.CreateItemsRequest"
                         }
                     }
                 ],
@@ -179,7 +179,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.UserCostItems"
+                            "$ref": "#/definitions/model.CreateItemsRequest"
                         }
                     }
                 ],
@@ -370,6 +370,25 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.CreateItemsRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "guid",
+                "item_name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "guid": {
+                    "type": "string"
+                },
+                "item_name": {
+                    "type": "string"
+                }
+            }
+        },
         "model.ExpensePeriod": {
             "type": "object",
             "properties": {
@@ -380,23 +399,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "todate": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.UserCostItems": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "guid": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "item_name": {
                     "type": "string"
                 }
             }
