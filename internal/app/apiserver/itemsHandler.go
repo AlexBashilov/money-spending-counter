@@ -29,9 +29,7 @@ import (
 //
 //	@Router			/book_cost_items/create [post]
 func (s *server) HandleItemsCreate() http.HandlerFunc {
-
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		req := &model.CreateItemsRequest{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
