@@ -155,6 +155,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/book_cost_items/report": {
+            "get": {
+                "description": "output report by all expense",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report"
+                ],
+                "summary": "output report",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/book_cost_items/report_by_month": {
+            "get": {
+                "description": "report by expense and month",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report"
+                ],
+                "summary": "report by expense and month",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "enter month",
+                        "name": "month",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/book_cost_items/update/{id}": {
             "post": {
                 "description": "Update items data in Db.",
