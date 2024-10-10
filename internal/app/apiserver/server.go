@@ -45,5 +45,7 @@ func (s *server) configureRouter() {
 	s.router.HandleFunc("/book_daily_expense/get_by_date", s.handleGetExpenseByDate).Methods("GET")
 	s.router.HandleFunc("/book_daily_expense/get_by_date_and_item", s.handleGetExpenseByItemAndDate).Methods("GET")
 	s.router.HandleFunc("/book_daily_expense/get_summ_by_period", s.handleGetExpenseSummByPeriod).Methods("GET")
+	s.router.HandleFunc("/book_cost_items/report", s.handleReport).Methods("GET")
+	s.router.HandleFunc("/book_cost_items/report_by_month", s.handleReportByMonth).Methods("GET")
 	s.router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 }

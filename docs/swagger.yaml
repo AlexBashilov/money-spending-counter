@@ -135,6 +135,46 @@ paths:
       summary: Get Items By Id
       tags:
       - items
+  /book_cost_items/report:
+    get:
+      description: output report by all expense
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+      summary: output report
+      tags:
+      - report
+  /book_cost_items/report_by_month:
+    get:
+      description: report by expense and month
+      parameters:
+      - description: enter month
+        in: path
+        name: month
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+      summary: report by expense and month
+      tags:
+      - report
   /book_cost_items/update/{id}:
     post:
       description: Update items data in Db.

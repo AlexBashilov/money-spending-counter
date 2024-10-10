@@ -21,4 +21,6 @@ type BookerRepository interface {
 	AddDeletedTime(int) error
 	CheckExist(comparisonSign interface{}) (bool, error)
 	AddDeletedAt(id int) error
+	GetExpenseSum() ([]map[string]interface{}, error)
+	GetExpenseSumByMonth(month int) ([]map[string]interface{}, error)
 }
