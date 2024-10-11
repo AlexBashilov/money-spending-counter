@@ -1,4 +1,4 @@
-package model
+package apiModels
 
 // ReportByMonth struct
 type ReportByMonth struct {

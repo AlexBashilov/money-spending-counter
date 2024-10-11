@@ -3,9 +3,12 @@ package main
 import (
 	_ "booker/docs"
 	"booker/internal/app/apiserver"
+	"booker/internal/build"
 	"flag"
+	"fmt"
 	"github.com/BurntSushi/toml"
 	"log"
+	"net/http"
 )
 
 var (
@@ -25,6 +28,8 @@ func init() {
 func main() {
 	flag.Parse()
 
+	//var validate = validator.InitValidator()
+
 	config := apiserver.NewConfig()
 
 	_, err := toml.DecodeFile(configPath, config)
@@ -32,8 +37,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := apiserver.Start(config); err != nil {
-		log.Fatal(err)
+	itemsHandler := build.BuildNewItemsHandler()
+	srv := build.NewServer(itemsHandler)
+
+	fmt.Println("Booker started")
+
+	if err = http.ListenAndServe(config.BindAddr, srv); err != nil {
+		panic(err)
 	}
 
 }
