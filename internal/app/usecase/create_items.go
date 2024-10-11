@@ -4,6 +4,7 @@ import (
 	"booker/internal/app/store/repository"
 	"booker/model/apiModels"
 	"booker/model/repomodels"
+	"context"
 )
 
 type Service struct {
@@ -18,13 +19,13 @@ func NewService(itemsRepo *repository.ItemsRepo, expenseRepo *repository.Expense
 	}
 }
 
-func (s *Service) CreateItems(req apiModels.CreateItemsRequest) error {
+func (s *Service) CreateItems(ctx context.Context, req apiModels.CreateItemsRequest) error {
 	U := &repomodels.Items{
 		ItemName:    req.ItemName,
 		GUID:        req.GUID,
 		Description: req.Description,
 	}
-	if err := s.itemsRepo.CreateItems(U); err != nil {
+	if err := s.itemsRepo.CreateItems(ctx, U); err != nil {
 		return err
 	}
 	return nil

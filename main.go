@@ -2,13 +2,12 @@ package main
 
 import (
 	_ "booker/docs"
-	"booker/internal/app/apiserver"
 	"booker/internal/build"
 	"flag"
-	"fmt"
-	"github.com/BurntSushi/toml"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+	"os"
 )
 
 var (
@@ -26,23 +25,18 @@ func init() {
 // @externalDocs.url	https://swagger.io/resources/open-api/
 // @host				localhost:8080
 func main() {
-	flag.Parse()
-
 	//var validate = validator.InitValidator()
-
-	config := apiserver.NewConfig()
-
-	_, err := toml.DecodeFile(configPath, config)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	itemsHandler := build.BuildNewItemsHandler()
 	srv := build.NewServer(itemsHandler)
 
-	fmt.Println("Booker started")
+	if err := godotenv.Load(".env"); err != nil {
+		log.Print("No .env file found")
+	}
 
-	if err = http.ListenAndServe(config.BindAddr, srv); err != nil {
+	log.Println("Booker started")
+
+	if err := http.ListenAndServe(os.Getenv("SERVICE_ADDRESS"), srv); err != nil {
 		panic(err)
 	}
 

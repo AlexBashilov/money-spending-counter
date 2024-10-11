@@ -6,6 +6,7 @@ import (
 	"booker/internal/app/usecase"
 	"booker/model/apiModels"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -58,15 +59,15 @@ func (s *ItemsHandler) HandleItemsCreate() http.HandlerFunc {
 		//	return
 		//}
 
-		if err := s.service.CreateItems(*req); err != nil {
+		if err := s.service.CreateItems(r.Context(), *req); err != nil {
 			respondWithJSON(w, http.StatusUnprocessableEntity, respond.ErrorItemsResponse{
-				Error:        err.Error(),
-				ErrorDetails: "invalid request body:required request fields not found"})
+				Error:        "invalid request body",
+				ErrorDetails: err.Error()})
 			return
 		}
 		respondWithJSON(w, http.StatusCreated, respond.ItemsResponse{
-			//Result:  fmt.Sprintf("item %s created with id - %d", U.ItemName, U.ID),
-			//Details:
+			Result:  fmt.Sprintf("item %s created with id - %s", req.ItemName, req.GUID),
+			Details: req,
 		})
 	}
 }

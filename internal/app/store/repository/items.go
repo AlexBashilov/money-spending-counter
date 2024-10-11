@@ -5,7 +5,6 @@ import (
 	"booker/model/repomodels"
 	"context"
 	"github.com/uptrace/bun"
-	"log"
 )
 
 // ItemsRepo initial items repo
@@ -38,8 +37,7 @@ func (i *ItemsRepo) UpdateItems(u *apiModels.UserCostItems, id int) (*apiModels.
 }
 
 // CreateItems create item in DB
-func (i *ItemsRepo) CreateItems(items *repomodels.Items) error {
-	ctx := context.Background()
+func (i *ItemsRepo) CreateItems(ctx context.Context, items *repomodels.Items) error {
 	_, err := i.client.NewInsert().
 		Model(items).
 		Column("item_name").
@@ -48,7 +46,7 @@ func (i *ItemsRepo) CreateItems(items *repomodels.Items) error {
 		Exec(ctx)
 
 	if err != nil {
-		log.Print(err)
+		return err
 	}
 
 	return nil

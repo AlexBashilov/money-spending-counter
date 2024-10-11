@@ -3,11 +3,12 @@ package repository
 import (
 	"booker/model/apiModels"
 	"booker/model/repomodels"
+	"context"
 )
 
 // ItemsRepository interface
 type ItemsRepository interface {
-	CreateItems(*repomodels.Items) error
+	CreateItems(ctx context.Context, items *repomodels.Items) error
 	GetAllItems() ([]map[string]interface{}, error)
 	GetOnlyOneItem(id int) (*apiModels.UserCostItems, error)
 	DeleteItems(id int) error
