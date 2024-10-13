@@ -25,9 +25,8 @@ func init() {
 // @externalDocs.url	https://swagger.io/resources/open-api/
 // @host				localhost:8080
 func main() {
-	//var validate = validator.InitValidator()
-
 	itemsHandler := build.BuildNewItemsHandler()
+
 	srv := build.NewServer(itemsHandler)
 
 	if err := godotenv.Load(".env"); err != nil {

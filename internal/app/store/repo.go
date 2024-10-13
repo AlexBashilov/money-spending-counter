@@ -1,4 +1,4 @@
-package repository
+package store
 
 import (
 	"booker/model/apiModels"

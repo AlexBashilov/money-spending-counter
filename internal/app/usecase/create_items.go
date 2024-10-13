@@ -1,18 +1,18 @@
 package usecase
 
 import (
-	"booker/internal/app/store/repository"
+	"booker/internal/app/store"
 	"booker/model/apiModels"
 	"booker/model/repomodels"
 	"context"
 )
 
 type Service struct {
-	itemsRepo   *repository.ItemsRepo
-	expenseRepo *repository.ExpenseRepo
+	itemsRepo   *store.ItemsRepo
+	expenseRepo *store.ExpenseRepo
 }
 
-func NewService(itemsRepo *repository.ItemsRepo, expenseRepo *repository.ExpenseRepo) *Service {
+func NewService(itemsRepo *store.ItemsRepo, expenseRepo *store.ExpenseRepo) *Service {
 	return &Service{
 		itemsRepo:   itemsRepo,
 		expenseRepo: expenseRepo,

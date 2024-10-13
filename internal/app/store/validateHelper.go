@@ -1,4 +1,4 @@
-package repository
+package store
 
 // CheckExist check entity exist in DB
 //func (r *ItemsRepo) CheckExist(comparisonSign interface{}) (bool, error) {

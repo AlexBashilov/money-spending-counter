@@ -5,6 +5,7 @@ import (
 	respond "booker/internal/app/error"
 	"booker/internal/app/usecase"
 	"booker/model/apiModels"
+	"booker/utils/validator"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,6 +18,8 @@ type ItemsHandler struct {
 func NewItemsHandler(service *usecase.Service) *ItemsHandler {
 	return &ItemsHandler{service: service}
 }
+
+var validate = validator.InitValidator()
 
 // HandleItemsCreate CreateItems    godoc
 //
@@ -43,21 +46,13 @@ func (s *ItemsHandler) HandleItemsCreate() http.HandlerFunc {
 			return
 		}
 
-		//itemExist, _ := store.ItemsRepository().CheckExist(req.ItemName)
-		//if itemExist {
-		//	respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
-		//		Error:        "item exist",
-		//		ErrorDetails: fmt.Sprintf("added cost items has ununique name - %s", U.ItemName)})
-		//	return
-		//}
-
-		//guidExist, _ := s.store.Booker().CheckExist(req.GUID)
-		//if guidExist {
-		//	respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
-		//		Error:        "guid exist",
-		//		ErrorDetails: "enter unique guid"})
-		//	return
-		//}
+		err := validate.Struct(req)
+		if err != nil {
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				Error:        "missing required field",
+				ErrorDetails: err.Error()})
+			return
+		}
 
 		if err := s.service.CreateItems(r.Context(), *req); err != nil {
 			respondWithJSON(w, http.StatusUnprocessableEntity, respond.ErrorItemsResponse{

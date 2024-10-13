@@ -1,4 +1,4 @@
-package repository
+package store
 
 //// GetExpenseSum get expense by sum
 //func (r *BookerRepository) GetExpenseSum() ([]map[string]interface{}, error) {
