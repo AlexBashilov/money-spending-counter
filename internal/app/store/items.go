@@ -1,7 +1,6 @@
 package store
 
 import (
-	"booker/model/apiModels"
 	"booker/model/repomodels"
 	"context"
 	"database/sql"
@@ -18,16 +17,6 @@ type ItemsRepo struct {
 
 func NewItemsRepo(client *bun.DB) *ItemsRepo {
 	return &ItemsRepo{client: client}
-}
-
-func (i *ItemsRepo) GetOnlyOneItem(id int) (*apiModels.UserCostItems, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (i *ItemsRepo) UpdateItems(u *apiModels.UserCostItems, id int) (*apiModels.UserCostItems, error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 // CreateItems create item in DB
@@ -94,38 +83,58 @@ func (i *ItemsRepo) DeleteItems(ctx context.Context, id int) error {
 	return nil
 }
 
-//// GetOnlyOneItem get items by ID
-//func (r *ItemsRepo) GetOnlyOneItem(itemID int) (*model.UserCostItems, error) {
-//	var id int
-//	var itemName string
-//	var guid uuid.UUID
-//	var description string
-//
-//	u := &model.UserCostItems{
-//		ID:          id,
-//		ItemName:    itemName,
-//		GUID:        guid,
-//		Description: description,
-//	}
-//	rows := r.store.db.QueryRow(
-//		"SELECT id, item_name, guid, description FROM book_cost_items WHERE id = $1 AND deleted_at IS NULL",
-//		itemID,
-//	).Scan(
-//		&u.ID,
-//		&u.ItemName,
-//		&u.GUID,
-//		&u.Description)
-//	if errors.Is(rows, sql.ErrNoRows) {
-//		return nil, nil
-//	}
-//	return u, nil
-//}
-//
-//// UpdateItems update items in DB
-//func (r *ItemsRepo) UpdateItems(u *model.UserCostItems, id int) (*model.UserCostItems, error) {
-//	_, err := r.store.db.Exec("UPDATE public.book_cost_items SET item_name = $1, guid=$2, description=$3 WHERE id = $4;", u.ItemName, u.GUID, u.Description, id)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	return u, nil
-//}
+// GetOne get items by ID
+func (i *ItemsRepo) GetOne(ctx context.Context, itemID int) (*repomodels.Items, error) {
+	var items repomodels.Items
+
+	err := i.client.NewSelect().
+		Model(&items).
+		Where("id = ?", itemID).
+		Where("deleted_at is null").
+		Scan(ctx)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return nil, err
+	}
+	if errors.Is(err, sql.ErrNoRows) {
+		logrus.Warningln(err)
+		return nil, errors.New("статья затрат либо удалена, либо не существует")
+	}
+
+	return &items, nil
+}
+
+// UpdateItems update items in DB
+func (i *ItemsRepo) UpdateItems(ctx context.Context, u *repomodels.Items, id int) error {
+	var items repomodels.Items
+
+	existsItemsInDb, err := i.CheckExist(ctx, id)
+	if err != nil {
+		return err
+	}
+	if existsItemsInDb {
+		exist, err := i.CheckItemsDeletedAt(ctx, id)
+		if err != nil {
+			return err
+		}
+		if !exist {
+			err = i.client.NewUpdate().
+				Model(&items).
+				Where("id = ?", id).
+				Set("item_name = ?", u.ItemName).
+				Set("guid = ?", u.GUID).
+				Set("description = ?", u.Description).
+				Where("id = ?", u.ID).
+				Scan(ctx)
+			if err != nil {
+				logrus.Warningln(err)
+			}
+		} else {
+			return errors.New("статья затрат удалена и имеет признак deleted_at")
+		}
+	} else {
+		return errors.New("статья затрат не существует")
+	}
+
+	return nil
+}

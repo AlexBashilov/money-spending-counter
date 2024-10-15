@@ -15,7 +15,7 @@ func (i *ItemsRepo) CheckExist(ctx context.Context, id int) (bool, error) {
 		Where("id = ?", id).
 		Exists(ctx)
 	if err != nil {
-		return true, errors.New("Ошибка при проверке существования статьи в таблице book_cost_items")
+		return true, errors.New("ошибка при проверке существования статьи в таблице book_cost_items")
 	}
 
 	return exists, nil
@@ -31,7 +31,7 @@ func (i *ItemsRepo) CheckItemsDeletedAt(ctx context.Context, id int) (bool, erro
 		Where("deleted_at is not null").
 		Exists(ctx)
 	if err != nil {
-		return true, err
+		return true, errors.New("ошибка при проверке существования статьи без даты удаления в таблице book_cost_items ")
 	}
 
 	return exists, nil

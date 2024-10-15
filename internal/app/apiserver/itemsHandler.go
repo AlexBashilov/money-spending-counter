@@ -123,7 +123,7 @@ func (s *ItemsHandler) HandleDeleteItems(w http.ResponseWriter, r *http.Request)
 		Details: fmt.Sprintf("item %d deleted successfully", itemID)})
 }
 
-// handleItemsUpdate UpdateItems    godoc
+// HandleItemsUpdate UpdateItems    godoc
 //
 //	@Summary		Update Items
 //	@Description	Update items data in Db.
@@ -139,47 +139,34 @@ func (s *ItemsHandler) HandleDeleteItems(w http.ResponseWriter, r *http.Request)
 //	@Failure		400		{string}	response.Response{}
 //
 //	@Router			/book_cost_items/update/{id} [post]
-//func (s *server) handleItemsUpdate() http.HandlerFunc {
-//	return func(w http.ResponseWriter, r *http.Request) {
-//		eventID, _ := strconv.Atoi(mux.Vars(r)["id"])
-//
-//		req := &apiModels.CreateItemsRequest{}
-//
-//		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-//			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
-//				Error:        err.Error(),
-//				ErrorDetails: "invalid request body"})
-//			return
-//
-//		}
-//
-//		itemExist, _ := repository.ItemsRepository.CheckExist(eventID)
-//		if !itemExist {
-//			respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
-//				Error:        "item not found",
-//				ErrorDetails: "item deleted or does not exist"})
-//			return
-//		}
-//
-//		u := &apiModels.UserCostItems{
-//			ItemName:    req.ItemName,
-//			GUID:        req.GUID,
-//			Description: req.Description,
-//		}
-//
-//		if _, err := repository.ItemsRepository.UpdateItems(u, eventID); err != nil {
-//			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
-//				Error:        err.Error(),
-//				ErrorDetails: "can not update item. contact technical support"})
-//			return
-//		}
-//		respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
-//			Result:  " success",
-//			Details: "item updated successfully"})
-//	}
-//}
+func (s *ItemsHandler) HandleItemsUpdate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		eventID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
-// handleGetOnlyOneItem GetItemsById    godoc
+		req := &apiModels.CreateItemsRequest{}
+
+		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				Error:        err.Error(),
+				ErrorDetails: "ошибка декодирования боди запроса"})
+
+			return
+		}
+
+		if err := s.service.UpdateItems(r.Context(), req, eventID); err != nil {
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				Error:        "ошибка обновления статьи затрат",
+				ErrorDetails: err.Error()})
+
+			return
+		}
+		respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+			Result:  "success",
+			Details: "статья затрат успешно обновлена"})
+	}
+}
+
+// HandleGetOnlyOneItem GetItemsById    godoc
 //
 //	@Summary		Get Items By Id
 //	@Description	Get Items By Id
@@ -192,19 +179,17 @@ func (s *ItemsHandler) HandleDeleteItems(w http.ResponseWriter, r *http.Request)
 //	@Failure		422	{string}	response.Response{}
 //
 //	@Router			/book_cost_items/get_only_one/{id} [get]
-//func (s *server) handleGetOnlyOneItem(w http.ResponseWriter, r *http.Request) {
-//	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
-//	res, err := repository.ItemsRepository.GetOnlyOneItem(itemID)
-//	if err != nil {
-//		s.error(w, r, http.StatusInternalServerError, err)
-//	}
-//	if res == nil {
-//		respondWithJSON(w, http.StatusBadRequest, respond.ItemsResponse{
-//			Result:  " not found",
-//			Details: "item not found, deleted or not exist"})
-//		return
-//	}
-//	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
-//		Result:  "success",
-//		Details: res})
-//}
+func (s *ItemsHandler) HandleGetOnlyOneItem(w http.ResponseWriter, r *http.Request) {
+	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
+	res, err := s.service.GetItemsByID(r.Context(), itemID)
+	if err != nil {
+		respondWithJSON(w, http.StatusBadRequest, respond.ItemsResponse{
+			Result:  "ошибка при обработке запроса",
+			Details: err})
+		fmt.Println("Никитос проебал багу =) поиск удаленной статьи.", err)
+		return
+	}
+	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+		Result:  "успешно",
+		Details: res})
+}
