@@ -14,6 +14,8 @@ type ItemsRepository interface {
 	DeleteItems(ctx context.Context, id int) error
 	UpdateItems(u *apiModels.UserCostItems, id int) (*apiModels.UserCostItems, error)
 	//AddDeletedAt(id int) error
+	CheckExist(ctx context.Context, id int) (bool, error)
+	CheckItemsDeletedAt(ctx context.Context, id int) (bool, error)
 }
 
 // ExpenseRepository interface

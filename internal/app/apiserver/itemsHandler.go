@@ -105,9 +105,9 @@ func (s *ItemsHandler) HandleDeleteItems(w http.ResponseWriter, r *http.Request)
 	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
 
 	if err := s.service.DeleteItems(r.Context(), itemID); err != nil {
-		respondWithJSON(w, http.StatusUnprocessableEntity, respond.ErrorItemsResponse{
-			Error:        err.Error(),
-			ErrorDetails: "something went wrong"})
+		respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+			Error:        "Неверные данные для удаления статьи затрат: статья либо удалена, либо не существует",
+			ErrorDetails: err.Error()})
 		return
 	}
 	//expenseExist, _ := s.store.Booker().CheckExpenseExist(itemID)
@@ -119,7 +119,7 @@ func (s *ItemsHandler) HandleDeleteItems(w http.ResponseWriter, r *http.Request)
 	//}
 
 	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
-		Result:  "deleted",
+		Result:  "success",
 		Details: fmt.Sprintf("item %d deleted successfully", itemID)})
 }
 

@@ -6,8 +6,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/sirupsen/logrus"
 	"github.com/uptrace/bun"
-	"log"
 	"time"
 )
 
@@ -65,14 +65,30 @@ func (i *ItemsRepo) GetAllItems(ctx context.Context) ([]repomodels.Items, error)
 // DeleteItems delete items
 func (i *ItemsRepo) DeleteItems(ctx context.Context, id int) error {
 	var items repomodels.Items
-	err := i.client.NewUpdate().
-		Model(&items).
-		Where("id = ?", id).
-		Set("deleted_at = ?", time.Now()).
-		Scan(ctx)
 
+	existsItemsInDb, err := i.CheckExist(ctx, id)
 	if err != nil {
-		log.Print(err)
+		return err
+	}
+	if existsItemsInDb {
+		exist, err := i.CheckItemsDeletedAt(ctx, id)
+		if err != nil {
+			return err
+		}
+		if !exist {
+			err = i.client.NewUpdate().
+				Model(&items).
+				Where("id = ?", id).
+				Set("deleted_at = ?", time.Now()).
+				Scan(ctx)
+			if err != nil {
+				logrus.Warningln(err)
+			}
+		} else {
+			return errors.New("статья затра удалена и имеет признак deleted_at")
+		}
+	} else {
+		return errors.New("статья затра не существует")
 	}
 
 	return nil
