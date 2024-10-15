@@ -9,9 +9,9 @@ import (
 // ItemsRepository interface
 type ItemsRepository interface {
 	CreateItems(ctx context.Context, items *repomodels.Items) error
-	GetAllItems() ([]map[string]interface{}, error)
+	GetAllItems(ctx context.Context) ([]repomodels.Items, error)
 	GetOnlyOneItem(id int) (*apiModels.UserCostItems, error)
-	DeleteItems(id int) error
+	DeleteItems(ctx context.Context, id int) error
 	UpdateItems(u *apiModels.UserCostItems, id int) (*apiModels.UserCostItems, error)
 	//AddDeletedAt(id int) error
 }

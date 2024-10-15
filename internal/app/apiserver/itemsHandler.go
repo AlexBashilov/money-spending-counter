@@ -8,7 +8,9 @@ import (
 	"booker/utils/validator"
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 )
 
 type ItemsHandler struct {
@@ -67,7 +69,7 @@ func (s *ItemsHandler) HandleItemsCreate() http.HandlerFunc {
 	}
 }
 
-// handleGetItems GetAllItems    godoc
+// HandleGetItems GetAllItems    godoc
 //
 //	@Summary		Get all items
 //	@Description	Get all items recorded to DB
@@ -77,18 +79,18 @@ func (s *ItemsHandler) HandleItemsCreate() http.HandlerFunc {
 //	@Failure		422	{string}	response.Response{}
 //
 //	@Router			/book_cost_items/get_all [get]
-//func (s *server) handleGetItems(w http.ResponseWriter, r *http.Request) {
-//
-//	res, err := repository.ItemsRepository().GetAllItems()
-//	if err != nil {
-//		s.error(w, r, http.StatusUnprocessableEntity, err)
-//	}
-//	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
-//		Result:  "success",
-//		Details: res})
-//}
+func (s *ItemsHandler) HandleGetItems(w http.ResponseWriter, r *http.Request) {
 
-// handleDeleteItems DeleteItems    godoc
+	response, err := s.service.GetAllItems(r.Context())
+	if err != nil {
+		respondWithJSON(w, http.StatusUnprocessableEntity, err)
+	}
+	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+		Result:  "success",
+		Details: response})
+}
+
+// HandleDeleteItems DeleteItems    godoc
 //
 //	@Summary		Delete item by id
 //	@Description	Delete items data from Db.
@@ -99,35 +101,27 @@ func (s *ItemsHandler) HandleItemsCreate() http.HandlerFunc {
 //	@Failure		422	{string}	response.Response{}
 //
 //	@Router			/book_cost_items/delete/{id} [delete]
-//func (s *server) handleDeleteItems(w http.ResponseWriter, r *http.Request) {
-//	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
-//
-//	itemExist, _ := s.store.Booker().CheckExist(itemID)
-//	if !itemExist {
-//		respondWithJSON(w, http.StatusNotFound, respond.ErrorItemsResponse{
-//			Error:        "item not found",
-//			ErrorDetails: "item deleted or does not exist"})
-//		return
-//	}
-//
-//	if err := repository.ItemsRepository.DeleteItems(itemID); err != nil {
-//		respondWithJSON(w, http.StatusUnprocessableEntity, respond.ErrorItemsResponse{
-//			Error:        err.Error(),
-//			ErrorDetails: "something went wrong"})
-//		return
-//	}
-//	expenseExist, _ := s.store.Booker().CheckExpenseExist(itemID)
-//	if expenseExist == true {
-//		err := repository.ItemsRepository.AddDeletedAt(itemID)
-//		if err != nil {
-//			log.Print(err)
-//		}
-//	}
-//
-//	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
-//		Result:  "deleted",
-//		Details: fmt.Sprintf("item %d deleted successfully", itemID)})
-//}
+func (s *ItemsHandler) HandleDeleteItems(w http.ResponseWriter, r *http.Request) {
+	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
+
+	if err := s.service.DeleteItems(r.Context(), itemID); err != nil {
+		respondWithJSON(w, http.StatusUnprocessableEntity, respond.ErrorItemsResponse{
+			Error:        err.Error(),
+			ErrorDetails: "something went wrong"})
+		return
+	}
+	//expenseExist, _ := s.store.Booker().CheckExpenseExist(itemID)
+	//if expenseExist == true {
+	//	err := repository.ItemsRepository.AddDeletedAt(itemID)
+	//	if err != nil {
+	//		log.Print(err)
+	//	}
+	//}
+
+	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+		Result:  "deleted",
+		Details: fmt.Sprintf("item %d deleted successfully", itemID)})
+}
 
 // handleItemsUpdate UpdateItems    godoc
 //

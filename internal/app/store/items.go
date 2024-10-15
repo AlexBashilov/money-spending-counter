@@ -4,7 +4,11 @@ import (
 	"booker/model/apiModels"
 	"booker/model/repomodels"
 	"context"
+	"database/sql"
+	"errors"
 	"github.com/uptrace/bun"
+	"log"
+	"time"
 )
 
 // ItemsRepo initial items repo
@@ -16,17 +20,7 @@ func NewItemsRepo(client *bun.DB) *ItemsRepo {
 	return &ItemsRepo{client: client}
 }
 
-func (i *ItemsRepo) GetAllItems() ([]map[string]interface{}, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (i *ItemsRepo) GetOnlyOneItem(id int) (*apiModels.UserCostItems, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (i *ItemsRepo) DeleteItems(id int) error {
 	//TODO implement me
 	panic("implement me")
 }
@@ -52,56 +46,38 @@ func (i *ItemsRepo) CreateItems(ctx context.Context, items *repomodels.Items) er
 	return nil
 }
 
-//
-//// GetAllItems get all items
-//func (r *ItemsRepo) GetAllItems() ([]map[string]interface{}, error) {
-//
-//	rows, err := r.store.db.Query(
-//		"SELECT id, item_name, guid, description FROM book_cost_items WHERE deleted_at IS NULL",
-//	)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//
-//	colNames, err := rows.Columns()
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	cols := make([]interface{}, len(colNames))
-//	colPtrs := make([]interface{}, len(colNames))
-//	for i := 0; i < len(colNames); i++ {
-//		colPtrs[i] = &cols[i]
-//	}
-//
-//	var mySlice = make([]map[string]interface{}, 0)
-//	for rows.Next() {
-//		var myMap = make(map[string]interface{})
-//		err = rows.Scan(colPtrs...)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//
-//		for i, col := range cols {
-//			myMap[colNames[i]] = col
-//		}
-//		mySlice = append(mySlice, myMap)
-//	}
-//
-//	if len(mySlice) < 1 {
-//		return nil, errors.New("no items found")
-//	}
-//	return mySlice, nil
-//}
-//
-//// DeleteItems delete items
-//func (r *ItemsRepo) DeleteItems(id int) error {
-//	_, err := r.store.db.Exec("UPDATE public.book_cost_items SET deleted_at = $2 WHERE id = $1;", id, time.Now())
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	return nil
-//}
-//
+// GetAllItems get all items
+func (i *ItemsRepo) GetAllItems(ctx context.Context) ([]repomodels.Items, error) {
+	var items repomodels.Items
+	var result []repomodels.Items
+	err := i.client.NewSelect().
+		Model(&items).
+		Where("deleted_at is null").
+		Scan(ctx, &result)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		result = []repomodels.Items{}
+	}
+
+	return result, nil
+}
+
+// DeleteItems delete items
+func (i *ItemsRepo) DeleteItems(ctx context.Context, id int) error {
+	var items repomodels.Items
+	err := i.client.NewUpdate().
+		Model(&items).
+		Where("id = ?", id).
+		Set("deleted_at = ?", time.Now()).
+		Scan(ctx)
+
+	if err != nil {
+		log.Print(err)
+	}
+
+	return nil
+}
+
 //// GetOnlyOneItem get items by ID
 //func (r *ItemsRepo) GetOnlyOneItem(itemID int) (*model.UserCostItems, error) {
 //	var id int
