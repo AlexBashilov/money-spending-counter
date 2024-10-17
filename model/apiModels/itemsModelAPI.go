@@ -1,4 +1,4 @@
-package model
+package apiModels
 
 import "github.com/google/uuid"
 
