@@ -4,7 +4,8 @@ import (
 	"booker/model/repomodels"
 	"context"
 	"database/sql"
-	"errors"
+	"fmt"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/uptrace/bun"
 	"time"
@@ -29,7 +30,7 @@ func (i *ItemsRepo) CreateItems(ctx context.Context, items *repomodels.Items) er
 		Exec(ctx)
 
 	if err != nil {
-		return err
+		return errors.Wrap(err, "ошибка обновления строки")
 	}
 
 	return nil
@@ -74,10 +75,10 @@ func (i *ItemsRepo) DeleteItems(ctx context.Context, id int) error {
 				logrus.Warningln(err)
 			}
 		} else {
-			return errors.New("статья затра удалена и имеет признак deleted_at")
+			return fmt.Errorf("статья затра удалена и имеет признак deleted_at: %w", err)
 		}
 	} else {
-		return errors.New("статья затра не существует")
+		return fmt.Errorf("статья затра не существует: %w", err)
 	}
 
 	return nil

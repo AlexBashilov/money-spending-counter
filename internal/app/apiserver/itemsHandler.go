@@ -145,6 +145,14 @@ func (s *ItemsHandler) HandleItemsUpdate() http.HandlerFunc {
 
 		req := &apiModels.CreateItemsRequest{}
 
+		err := validate.Struct(req)
+		if err != nil {
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				Error:        "missing required field",
+				ErrorDetails: err.Error()})
+			return
+		}
+
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
 				Error:        err.Error(),
