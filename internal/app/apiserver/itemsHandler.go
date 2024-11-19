@@ -8,9 +8,15 @@ import (
 	"booker/utils/validator"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
+
+	"github.com/rs/zerolog/log"
+
+	"go.opentelemetry.io/contrib/bridges/otelslog"
+
+	"github.com/gorilla/mux"
+	"go.opentelemetry.io/otel"
 )
 
 type ItemsHandler struct {
@@ -22,6 +28,12 @@ func NewItemsHandler(service *usecase.Service) *ItemsHandler {
 }
 
 var validate = validator.InitValidator()
+
+var (
+	name   = "items-handlers"
+	tracer = otel.GetTracerProvider().Tracer(name)
+	logger = otelslog.NewLogger(name)
+)
 
 // HandleItemsCreate CreateItems    godoc
 //
@@ -40,6 +52,12 @@ var validate = validator.InitValidator()
 //	@Router			/book_cost_items/create [post]
 func (s *ItemsHandler) HandleItemsCreate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		_, span := tracer.Start(r.Context(), "Create Items in book_cost_items")
+		defer span.End()
+		log.Info().Msg("create items handler")
+		logger.Info("create")
+		fmt.Println("span", span)
+
 		req := &apiModels.CreateItemsRequest{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{

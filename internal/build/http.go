@@ -2,11 +2,11 @@ package build
 
 import (
 	"booker/internal/app/apiserver"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"net/http"
 )
 
 type Server struct {
@@ -20,7 +20,6 @@ func NewServer(itemsHandler *apiserver.ItemsHandler) *Server {
 	s := &Server{
 		router:       mux.NewRouter(),
 		logger:       logrus.New(),
-		Transport:    otelhttp.NewTransport(http.DefaultTransport),
 		itemsHandler: itemsHandler,
 	}
 
