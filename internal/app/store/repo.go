@@ -1,26 +1,31 @@
 package store
 
 import (
-	"booker/internal/app/model"
+	"booker/model/apiModels"
+	"booker/model/repomodels"
+	"context"
 )
 
-// BookerRepository interface
-type BookerRepository interface {
-	CreateItems(items *model.UserCostItems) error
-	GetAllItems() ([]map[string]interface{}, error)
-	GetOnlyOneItem(id int) (*model.UserCostItems, error)
-	DeleteItems(id int) error
-	UpdateItems(u *model.UserCostItems, id int) (*model.UserCostItems, error)
-	CreateExpense(u *model.UserExpense) error
-	GetExpenseByItem(itemID int) ([]map[string]interface{}, error)
-	UpdateItemID(item string) error
-	GetExpenseByDate(period *model.ExpensePeriod) ([]map[string]interface{}, error)
-	GetExpenseByItemAndDate(time *model.ExpensePeriod) ([]map[string]interface{}, error)
-	GetExpenseSummByPeriodAndItem(time *model.ExpensePeriod) (string, error)
-	GetExpenseSummByPeriod(time *model.ExpensePeriod) (string, error)
+// ItemsRepository interface
+type ItemsRepository interface {
+	CreateItems(ctx context.Context, items *repomodels.Items) error
+	GetAllItems(ctx context.Context) ([]repomodels.Items, error)
+	GetOne(ctx context.Context, itemID int) (*repomodels.Items, error)
+	DeleteItems(ctx context.Context, id int) error
+	UpdateItems(ctx context.Context, u *repomodels.Items, id int) error
+	//AddDeletedAt(id int) error
+	CheckExist(ctx context.Context, id int) (bool, error)
+	CheckItemsDeletedAt(ctx context.Context, id int) (bool, error)
+}
+
+// ExpenseRepository interface
+type ExpenseRepository interface {
+	GetExpenseByDate(period *apiModels.ExpensePeriod) ([]map[string]interface{}, error)
+	GetExpenseByItemAndDate(time *apiModels.ExpensePeriod) ([]map[string]interface{}, error)
+	GetExpenseSummByPeriodAndItem(time *apiModels.ExpensePeriod) (string, error)
+	GetExpenseSummByPeriod(time *apiModels.ExpensePeriod) (string, error)
 	AddDeletedTime(int) error
 	CheckExist(comparisonSign interface{}) (bool, error)
-	AddDeletedAt(id int) error
 	GetExpenseSum() ([]map[string]interface{}, error)
 	GetExpenseSumByMonth(month int) ([]map[string]interface{}, error)
 }
