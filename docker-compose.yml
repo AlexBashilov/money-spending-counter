@@ -9,9 +9,5 @@ services:
       POSTGRES_DB: booker
     ports:
       - "5433:5432"
-
-  jaeger:
-    image: jaegertracing/all-in-one
-    ports:
-      - "14268:14268"
-      - "16686:16686"
+    depends_on:  
+      - jaeger

@@ -13,8 +13,10 @@ import (
 )
 
 func ItitTracer() (*trace.TracerProvider, error) {
+
 	ctx := context.Background()
-	exporter, err := otlptracehttp.New(ctx, otlptracehttp.WithEndpoint("http://localhost:14268/api/traces"), otlptracehttp.WithInsecure())
+	exporter, err := otlptracehttp.New(ctx, otlptracehttp.WithEndpoint("https://localhost:4318/v1/traces"),
+		otlptracehttp.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
