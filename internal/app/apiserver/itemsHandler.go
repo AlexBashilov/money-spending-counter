@@ -8,9 +8,16 @@ import (
 	"booker/utils/validator"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
+
+	"github.com/rs/zerolog/log"
+
+	"go.opentelemetry.io/contrib/bridges/otelslog"
+	"go.opentelemetry.io/otel/attribute"
+
+	"github.com/gorilla/mux"
+	"go.opentelemetry.io/otel"
 )
 
 type ItemsHandler struct {
@@ -22,6 +29,12 @@ func NewItemsHandler(service *usecase.Service) *ItemsHandler {
 }
 
 var validate = validator.InitValidator()
+
+var (
+	name   = "items-handlers"
+	tracer = otel.GetTracerProvider().Tracer(name)
+	logger = otelslog.NewLogger(name)
+)
 
 // HandleItemsCreate CreateItems    godoc
 //
@@ -40,6 +53,17 @@ var validate = validator.InitValidator()
 //	@Router			/book_cost_items/create [post]
 func (s *ItemsHandler) HandleItemsCreate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		_, span := tracer.Start(r.Context(), "book_cost_items/create")
+		defer span.End()
+		fmt.Println("span", span)
+		log.Info().Msg("create items handler")
+		logger.Info("create")
+
+		span.SetAttributes(
+			attribute.String("http.url", r.URL.String()),
+			attribute.String("http.method", r.Method),
+		)
+
 		req := &apiModels.CreateItemsRequest{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
@@ -55,7 +79,6 @@ func (s *ItemsHandler) HandleItemsCreate() http.HandlerFunc {
 				ErrorDetails: err.Error()})
 			return
 		}
-
 		if err := s.service.CreateItems(r.Context(), *req); err != nil {
 			respondWithJSON(w, http.StatusUnprocessableEntity, respond.ErrorItemsResponse{
 				Error:        "invalid request body",
@@ -66,6 +89,7 @@ func (s *ItemsHandler) HandleItemsCreate() http.HandlerFunc {
 			Result:  fmt.Sprintf("item %s created with id - %s", req.ItemName, req.GUID),
 			Details: req,
 		})
+
 	}
 }
 

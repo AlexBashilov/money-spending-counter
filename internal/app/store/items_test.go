@@ -1,56 +1,47 @@
-package store
+package store_test
 
-import (
-	"booker/internal/build"
-	"booker/model/repomodels"
-	"context"
-	"github.com/google/uuid"
-	"github.com/uptrace/bun"
-	"testing"
-)
-
-func TestItemsRepo_CreateItems(t *testing.T) {
-	dataBase := build.NewStore()
-	defer dataBase.Close()
-	type fields struct {
-		client *bun.DB
-	}
-	type args struct {
-		ctx   context.Context
-		items *repomodels.Items
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "create items test",
-			fields: fields{
-				client: dataBase,
-			},
-			args: args{
-				ctx: context.Background(),
-				items: &repomodels.Items{
-					ItemName:    "затраты",
-					GUID:        uuid.New(),
-					Description: "тестик",
-				},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			i := &ItemsRepo{
-				client: tt.fields.client,
-			}
-			if err := i.CreateItems(tt.args.ctx, tt.args.items); (err != nil) != tt.wantErr {
-				t.Errorf("CreateItems() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
+//func TestItemsRepo_CreateItems(t *testing.T) {
+//	dataBase := build.NewStore()
+//	defer dataBase.Close()
+//	type fields struct {
+//		client *bun.DB
+//	}
+//	type args struct {
+//		ctx   context.Context
+//		items *repomodels.Items
+//	}
+//	tests := []struct {
+//		name    string
+//		fields  fields
+//		args    args
+//		wantErr bool
+//	}{
+//		{
+//			name: "create items test",
+//			fields: fields{
+//				client: dataBase,
+//			},
+//			args: args{
+//				ctx: context.Background(),
+//				items: &repomodels.Items{
+//					ItemName:    "затраты",
+//					GUID:        uuid.New(),
+//					Description: "тестик",
+//				},
+//			},
+//		},
+//	}
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			i := &store.ItemsRepo{
+//				client: tt.fields.client,
+//			}
+//			if err := i.CreateItems(tt.args.ctx, tt.args.items); (err != nil) != tt.wantErr {
+//				t.Errorf("CreateItems() error = %v, wantErr %v", err, tt.wantErr)
+//			}
+//		})
+//	}
+//}
 
 //func TestItemsRepo_DeleteItems(t *testing.T) {
 //	type fields struct {

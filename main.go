@@ -2,12 +2,14 @@ package main
 
 import (
 	_ "booker/docs"
+	"booker/internal/app/trace"
 	"booker/internal/build"
 	"flag"
-	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 var (
@@ -26,6 +28,11 @@ func init() {
 // @host				localhost:8080
 func main() {
 	itemsHandler := build.BuildNewItemsHandler()
+
+	err := trace.NewTracer()
+	if err != nil {
+		log.Fatal("init tracer", err)
+	}
 
 	srv := build.NewServer(itemsHandler)
 
