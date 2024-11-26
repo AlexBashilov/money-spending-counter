@@ -2,6 +2,12 @@ package store
 
 import (
 	"booker/model/apiModels"
+	"booker/model/repomodels"
+	"context"
+	"database/sql"
+	"fmt"
+
+	"github.com/pkg/errors"
 	"github.com/uptrace/bun"
 )
 
@@ -59,41 +65,54 @@ func (e *ExpenseRepo) GetExpenseSumByMonth(month int) ([]map[string]interface{},
 	panic("implement me")
 }
 
-//// CreateExpense create expense
-//func (r *BookerRepository) CreateExpense(u *model.UserExpense) error {
-//	exists, _ := r.CheckExist(u.Item)
-//	if exists {
-//		return r.store.db.QueryRow(
-//			"INSERT INTO book_daily_expense (amount, date, item) VALUES ($1, $2, $3) RETURNING id",
-//			u.Amount,
-//			u.Date,
-//			u.Item,
-//		).Scan(&u.ID)
-//	}
-//	if err := r.UpdateItemID(u.Item); err != nil {
-//		return err
-//	}
-//	return errors.New("invalid item")
-//}
-//
-//// UpdateItemID update item ID
-//func (r *BookerRepository) UpdateItemID(item string) error {
-//	var id int
-//
-//	if err := r.store.db.QueryRow(
-//		"SELECT id FROM book_cost_items WHERE item_name = $1",
-//		item,
-//	).Scan(&id); err != nil {
-//		return err
-//	}
-//
-//	sqlStatment := "UPDATE book_daily_expense SET item_id =$1 WHERE item=$2"
-//	_, err := r.store.db.Exec(sqlStatment, id, item)
-//	if err != nil {
-//		return err
-//	}
-//	return nil
-//}
+// CreateExpense create expense
+func (e *ExpenseRepo) CreateExpense(ctx context.Context, expense *repomodels.Expense) error {
+	_, err := e.client.NewInsert().
+		Model(expense).
+		Column("amount").
+		Column("date").
+		Column("item").
+		Exec(ctx)
+
+	if err != nil {
+		return errors.Wrap(err, "ошибка внесения суммы в БД")
+	}
+
+	var items *repomodels.Items
+
+	if err := e.UpdateItemID(ctx, expense, items); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UpdateItemID update item ID
+func (e *ExpenseRepo) UpdateItemID(ctx context.Context, expense *repomodels.Expense, items *repomodels.Items) error {
+	var result repomodels.Items
+	fmt.Println("expense", expense)
+
+	err := e.client.NewSelect().
+		Model(items).
+		Where("item_name = ?", expense.Item).
+		Scan(ctx, &result)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		result = repomodels.Items{}
+	}
+
+	err = e.client.NewUpdate().
+		Model(expense).
+		Where("item = ?", expense.Item).
+		Set("item_id = ?", &result.ID).
+		Scan(ctx)
+	if err != nil {
+		return fmt.Errorf("ошибка обновления book_daily_expense.id: %w", err)
+	}
+
+	return nil
+}
+
 //
 //// GetExpenseByItem get expense by item
 //func (r *BookerRepository) GetExpenseByItem(itemID int) ([]map[string]interface{}, error) {

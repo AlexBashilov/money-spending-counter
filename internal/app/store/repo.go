@@ -1,7 +1,6 @@
 package store
 
 import (
-	"booker/model/apiModels"
 	"booker/model/repomodels"
 	"context"
 )
@@ -20,12 +19,13 @@ type ItemsRepository interface {
 
 // ExpenseRepository interface
 type ExpenseRepository interface {
-	GetExpenseByDate(period *apiModels.ExpensePeriod) ([]map[string]interface{}, error)
-	GetExpenseByItemAndDate(time *apiModels.ExpensePeriod) ([]map[string]interface{}, error)
-	GetExpenseSummByPeriodAndItem(time *apiModels.ExpensePeriod) (string, error)
-	GetExpenseSummByPeriod(time *apiModels.ExpensePeriod) (string, error)
-	AddDeletedTime(int) error
-	CheckExist(comparisonSign interface{}) (bool, error)
-	GetExpenseSum() ([]map[string]interface{}, error)
-	GetExpenseSumByMonth(month int) ([]map[string]interface{}, error)
+	CreateExpense(ctx context.Context, expense repomodels.Expense) error
+	// GetExpenseByDate(period *apiModels.ExpensePeriod) ([]map[string]interface{}, error)
+	// GetExpenseByItemAndDate(time *apiModels.ExpensePeriod) ([]map[string]interface{}, error)
+	// GetExpenseSummByPeriodAndItem(time *apiModels.ExpensePeriod) (string, error)
+	// GetExpenseSummByPeriod(time *apiModels.ExpensePeriod) (string, error)
+	// AddDeletedTime(int) error
+	// CheckExist(comparisonSign interface{}) (bool, error)
+	// GetExpenseSum() ([]map[string]interface{}, error)
+	// GetExpenseSumByMonth(month int) ([]map[string]interface{}, error)
 }

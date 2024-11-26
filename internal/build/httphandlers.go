@@ -6,10 +6,10 @@ import (
 	"booker/internal/app/usecase"
 )
 
-func BuildNewItemsHandler() *apiserver.ItemsHandler {
+func BuildNewItemsHandler() (*apiserver.ItemsHandler, *apiserver.ExpenseHandler) {
 	bun := NewStore()
 	itemsRepo := store.NewItemsRepo(bun)
 	expenseRepo := store.NewExpenseRepo(bun)
 	service := usecase.NewService(itemsRepo, expenseRepo)
-	return apiserver.NewItemsHandler(service)
+	return apiserver.NewItemsHandler(service), apiserver.NewExpenseHandler(service)
 }

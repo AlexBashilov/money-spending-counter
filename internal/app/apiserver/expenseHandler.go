@@ -1,75 +1,69 @@
 package apiserver
 
+import (
+	respond "booker/internal/app/error"
+	"booker/internal/app/usecase"
+	"booker/model/apiModels"
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+type ExpenseHandler struct {
+	service *usecase.Service
+}
+
+func NewExpenseHandler(service *usecase.Service) *ExpenseHandler {
+	return &ExpenseHandler{service: service}
+}
+
+// handleExpenseCreate Expense Create    godoc
 //
-//import (
-//	respond "booker/internal/app/error"
-//	"booker/model/apiModels"
-//	"encoding/json"
-//	"fmt"
-//	"github.com/gorilla/mux"
-//	"net/http"
-//	"strconv"
-//	"time"
-//)
+//	@Summary		Expense Create
+//	@Description	Expense Create
 //
-//// handleExpenseCreate Expense Create    godoc
-////
-////	@Summary		Expense Create
-////	@Description	Expense Create
-////
-////	@Param			request	body	model.UserExpense	true	"query params"
-////
-////	@Produce		application/json
-////	@Tags			expense
-////	@Success		201	{string}	response.Response{}
-////	@Failure		422	{string}	response.Response{}
-////	@Failure		400	{string}	response.Response{}
-////
-////	@Router			/book_daily_expense/create [post]
-//func (s *server) handleExpenseCreate() http.HandlerFunc {
-//	return func(w http.ResponseWriter, r *http.Request) {
-//		req := &apiModels.CreateExpenseRequest{}
+//	@Param			request	body	model.UserExpense	true	"query params"
 //
-//		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-//			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
-//				Error:        "invalid request body",
-//				ErrorDetails: err.Error()})
-//			return
-//		}
-//		u := &apiModels.UserExpense{
-//			Amount: req.Amount,
-//			Item:   req.Item,
-//			Date:   time.Now(),
-//		}
+//	@Produce		application/json
+//	@Tags			expense
+//	@Success		201	{string}	response.Response{}
+//	@Failure		422	{string}	response.Response{}
+//	@Failure		400	{string}	response.Response{}
 //
-//		err := validate.Struct(req)
-//		if err != nil {
-//			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
-//				Error:        "missing required field",
-//				ErrorDetails: err.Error()})
-//			return
-//		}
-//
-//		itemExist, _ := s.store.Booker().CheckExist(req.Item)
-//		if !itemExist {
-//			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
-//				Error:        "item not found",
-//				ErrorDetails: fmt.Sprintf("item %s not found or does not exist", u.Item)})
-//			return
-//		}
-//
-//		if err := s.store.Booker().CreateExpense(u); err != nil {
-//			s.error(w, r, http.StatusUnprocessableEntity, err)
-//			return
-//		}
-//		if err := s.store.Booker().UpdateItemID(u.Item); err != nil {
-//			s.error(w, r, http.StatusUnprocessableEntity, err)
-//			return
-//		}
-//		s.respond(w, r, http.StatusCreated, u)
-//	}
-//}
-//
+//	@Router			/book_daily_expense/create [post]
+func (s *ExpenseHandler) HandleExpenseCreate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		req := &apiModels.CreateExpenseRequest{}
+
+		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				Error:        "invalid request body",
+				ErrorDetails: err.Error()})
+			return
+		}
+
+		err := validate.Struct(req)
+		if err != nil {
+			respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+				Error:        "missing required field",
+				ErrorDetails: err.Error()})
+			return
+		}
+
+		if err := s.service.CreateExpense(r.Context(), *req); err != nil {
+			respondWithJSON(w, http.StatusUnprocessableEntity, respond.ErrorItemsResponse{
+				Error:        "invalid request body",
+				ErrorDetails: err.Error()})
+			return
+		}
+
+		respondWithJSON(w, http.StatusCreated, respond.ItemsResponse{
+			Result:  fmt.Sprintf("внесена сумма - %f, по статье - %s", req.Amount, req.Item),
+			Details: req,
+		})
+	}
+}
+
 //// handleGetExpenseByItem GetExpenseByItem    godoc
 ////
 ////	@Summary		Get Expense By Item

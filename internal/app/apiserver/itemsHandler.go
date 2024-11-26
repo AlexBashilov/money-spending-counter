@@ -11,13 +11,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/rs/zerolog/log"
-
-	"go.opentelemetry.io/contrib/bridges/otelslog"
-	"go.opentelemetry.io/otel/attribute"
-
 	"github.com/gorilla/mux"
-	"go.opentelemetry.io/otel"
 )
 
 type ItemsHandler struct {
@@ -30,11 +24,11 @@ func NewItemsHandler(service *usecase.Service) *ItemsHandler {
 
 var validate = validator.InitValidator()
 
-var (
-	name   = "items-handlers"
-	tracer = otel.GetTracerProvider().Tracer(name)
-	logger = otelslog.NewLogger(name)
-)
+// var (
+// 	name   = "items-handlers"
+// 	tracer = otel.GetTracerProvider().Tracer(name)
+// 	logger = otelslog.NewLogger(name)
+// )
 
 // HandleItemsCreate CreateItems    godoc
 //
@@ -53,16 +47,16 @@ var (
 //	@Router			/book_cost_items/create [post]
 func (s *ItemsHandler) HandleItemsCreate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, span := tracer.Start(r.Context(), "book_cost_items/create")
-		defer span.End()
-		fmt.Println("span", span)
-		log.Info().Msg("create items handler")
-		logger.Info("create")
+		// _, span := tracer.Start(r.Context(), "book_cost_items/create")
+		// defer span.End()
+		// fmt.Println("span", span)
+		// log.Info().Msg("create items handler")
+		// logger.Info("create")
 
-		span.SetAttributes(
-			attribute.String("http.url", r.URL.String()),
-			attribute.String("http.method", r.Method),
-		)
+		// span.SetAttributes(
+		// 	attribute.String("http.url", r.URL.String()),
+		// 	attribute.String("http.method", r.Method),
+		// )
 
 		req := &apiModels.CreateItemsRequest{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {

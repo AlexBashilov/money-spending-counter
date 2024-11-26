@@ -37,3 +37,19 @@ func (i *ItemsRepo) CheckItemsDeletedAt(ctx context.Context, id int) (bool, erro
 
 	return exists, nil
 }
+
+// CheckExist check entity exist in DB
+func (i *ItemsRepo) CheckExistItem(ctx context.Context, item string) (bool, error) {
+	var items repomodels.Items
+
+	exists, err := i.client.NewSelect().
+		Model(&items).
+		Where("item = ?", item).
+		Exists(ctx)
+
+	if err != nil {
+		return true, fmt.Errorf("статья не найдена (обрабатывать в позитивном ключе): %w", err)
+	}
+
+	return exists, nil
+}

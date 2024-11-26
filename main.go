@@ -27,14 +27,14 @@ func init() {
 // @externalDocs.url	https://swagger.io/resources/open-api/
 // @host				localhost:8080
 func main() {
-	itemsHandler := build.BuildNewItemsHandler()
+	itemsHandler, expenseHandler := build.BuildNewItemsHandler()
 
 	err := trace.NewTracer()
 	if err != nil {
 		log.Fatal("init tracer", err)
 	}
 
-	srv := build.NewServer(itemsHandler)
+	srv := build.NewServer(itemsHandler, expenseHandler)
 
 	if err := godotenv.Load(".env"); err != nil {
 		log.Print("No .env file found")
