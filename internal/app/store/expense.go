@@ -113,41 +113,28 @@ func (e *ExpenseRepo) UpdateItemID(ctx context.Context, expense *repomodels.Expe
 	return nil
 }
 
-//
-//// GetExpenseByItem get expense by item
-//func (r *BookerRepository) GetExpenseByItem(itemID int) ([]map[string]interface{}, error) {
-//	rows, err := r.store.db.Query(
-//		"SELECT item, amount, date FROM book_daily_expense WHERE item_id = $1 AND deleted_at IS NULL", itemID)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//
-//	colNames, err := rows.Columns()
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	cols := make([]interface{}, len(colNames))
-//	colPtrs := make([]interface{}, len(colNames))
-//	for i := 0; i < len(colNames); i++ {
-//		colPtrs[i] = &cols[i]
-//	}
-//
-//	var querySlice = make([]map[string]interface{}, 0)
-//	for rows.Next() {
-//		var queryMap = make(map[string]interface{})
-//		err = rows.Scan(colPtrs...)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//
-//		for i, col := range cols {
-//			queryMap[colNames[i]] = col
-//		}
-//		querySlice = append(querySlice, queryMap)
-//	}
-//	return querySlice, nil
-//}
-//
+// GetExpenseByItem get expense by item
+func (e *ExpenseRepo) GetExpenseByItem(ctx context.Context, itemID int) ([]repomodels.Expense, error) {
+
+	var expense *repomodels.Expense
+	var result []repomodels.Expense
+
+	err := e.client.NewSelect().
+		Model(expense).
+		Column("item").
+		Column("amount").
+		Column("date").
+		Where("item_id = ?", itemID).
+		Where("deleted_at is null").
+		Scan(ctx, &result)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		result = []repomodels.Expense{}
+	}
+
+	return result, nil
+}
+
 //// GetExpenseByDate get expense by date
 //func (r *BookerRepository) GetExpenseByDate(time *model.ExpensePeriod) ([]map[string]interface{}, error) {
 //	rows, err := r.store.db.Query(

@@ -1,12 +1,13 @@
 package usecase
 
 import (
-	"booker/model/apiModels"
-	"booker/model/repomodels"
 	"context"
 	"errors"
 	"log"
 	"time"
+
+	"booker/model/apiModels"
+	"booker/model/repomodels"
 )
 
 func (s *Service) CreateExpense(ctx context.Context, req apiModels.CreateExpenseRequest) error {

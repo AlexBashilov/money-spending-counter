@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	respond "booker/internal/app/error"
 	"booker/internal/app/usecase"
 	"booker/model/apiModels"
+
+	"github.com/gorilla/mux"
 )
 
 type ExpenseHandler struct {
@@ -65,29 +68,35 @@ func (s *ExpenseHandler) HandleExpenseCreate() http.HandlerFunc {
 	}
 }
 
-//// handleGetExpenseByItem GetExpenseByItem    godoc
-////
-////	@Summary		Get Expense By Item
-////	@Description	Get Expense By Item
-////
-////	@Param			id	path	string	true	"enter item_id"
-////
-////	@Produce		application/json
-////	@Tags			expense
-////	@Success		200	{string}	response.Response{}
-////	@Failure		422	{string}	response.Response{}
-////
-////	@Router			/book_daily_expense/get_by_id/{id} [get]
-//func (s *server) handleGetExpenseByItem(w http.ResponseWriter, r *http.Request) {
-//	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
+// handleGetExpenseByItem GetExpenseByItem    godoc
 //
-//	res, err := s.store.Booker().GetExpenseByItem(itemID)
-//	if err != nil {
-//		s.error(w, r, http.StatusUnprocessableEntity, err)
-//	}
-//	respondWithJSON(w, http.StatusOK, res)
-//}
+//	@Summary		Get Expense By Item
+//	@Description	Get Expense By Item
 //
+//	@Param			id	path	string	true	"enter item_id"
+//
+//	@Produce		application/json
+//	@Tags			expense
+//	@Success		200	{string}	response.Response{}
+//	@Failure		422	{string}	response.Response{}
+//
+//	@Router			/book_daily_expense/get_by_id/{id} [get]
+func (s *ExpenseHandler) HandleGetExpenseByItem(w http.ResponseWriter, r *http.Request) {
+	itemID, _ := strconv.Atoi(mux.Vars(r)["id"])
+
+	res, err := s.service.GetExpenseByItem(r.Context(), itemID)
+	if err != nil {
+		respondWithJSON(w, http.StatusBadRequest, respond.ErrorItemsResponse{
+			Error:        "невалидный запрос",
+			ErrorDetails: err.Error()})
+		return
+	}
+	respondWithJSON(w, http.StatusOK, respond.ItemsResponse{
+		Result:  "успешно",
+		Details: res,
+	})
+}
+
 //// handleExpenseByDate handleGetExpenseByDate    godoc
 ////
 ////	@Summary		Get Expense By date

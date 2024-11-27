@@ -21,6 +21,7 @@ type ItemsRepository interface {
 // ExpenseRepository interface
 type ExpenseRepository interface {
 	CreateExpense(ctx context.Context, expense repomodels.Expense) error
+	GetExpenseByItem(ctx context.Context, itemID int) ([]repomodels.Expense, error)
 	// GetExpenseByDate(period *apiModels.ExpensePeriod) ([]map[string]interface{}, error)
 	// GetExpenseByItemAndDate(time *apiModels.ExpensePeriod) ([]map[string]interface{}, error)
 	// GetExpenseSummByPeriodAndItem(time *apiModels.ExpensePeriod) (string, error)

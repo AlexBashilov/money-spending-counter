@@ -1,8 +1,9 @@
 package usecase
 
 import (
-	"booker/model/repomodels"
 	"context"
+
+	"booker/model/repomodels"
 )
 
 func (s *Service) GetAllItems(ctx context.Context) ([]repomodels.Items, error) {
