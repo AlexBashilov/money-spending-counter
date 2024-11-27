@@ -5,10 +5,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
+
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/uptrace/bun"
-	"time"
 )
 
 // ItemsRepo initial items repo
@@ -75,7 +76,7 @@ func (i *ItemsRepo) DeleteItems(ctx context.Context, id int) error {
 				logrus.Warningln(err)
 			}
 		} else {
-			return fmt.Errorf("статья затра удалена и имеет признак deleted_at: %w", err)
+			return fmt.Errorf("статья затрат удалена и имеет признак deleted_at: %w", err)
 		}
 	} else {
 		return fmt.Errorf("статья затра не существует: %w", err)

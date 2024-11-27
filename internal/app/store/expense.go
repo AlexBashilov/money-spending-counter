@@ -74,7 +74,7 @@ func (e *ExpenseRepo) CreateExpense(ctx context.Context, expense *repomodels.Exp
 		Column("item").
 		Exec(ctx)
 
-	if err != nil {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return errors.Wrap(err, "ошибка внесения суммы в БД")
 	}
 
@@ -90,7 +90,6 @@ func (e *ExpenseRepo) CreateExpense(ctx context.Context, expense *repomodels.Exp
 // UpdateItemID update item ID
 func (e *ExpenseRepo) UpdateItemID(ctx context.Context, expense *repomodels.Expense, items *repomodels.Items) error {
 	var result repomodels.Items
-	fmt.Println("expense", expense)
 
 	err := e.client.NewSelect().
 		Model(items).
@@ -106,7 +105,7 @@ func (e *ExpenseRepo) UpdateItemID(ctx context.Context, expense *repomodels.Expe
 		Where("item = ?", expense.Item).
 		Set("item_id = ?", &result.ID).
 		Scan(ctx)
-	if err != nil {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return fmt.Errorf("ошибка обновления book_daily_expense.id: %w", err)
 	}
 

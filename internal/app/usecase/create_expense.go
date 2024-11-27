@@ -4,6 +4,7 @@ import (
 	"booker/model/apiModels"
 	"booker/model/repomodels"
 	"context"
+	"errors"
 	"log"
 	"time"
 )
@@ -15,10 +16,14 @@ func (s *Service) CreateExpense(ctx context.Context, req apiModels.CreateExpense
 		Date:   time.Now(),
 	}
 
-	_, err := s.itemsRepo.CheckExistItem(ctx, req.Item)
+	existsItemsInDb, err := s.itemsRepo.CheckExistItem(ctx, req.Item)
 	if err != nil {
 		log.Println(err)
-	} else {
+	}
+	if !existsItemsInDb {
+		return errors.New("статья затрат либо удалена, либо не существует")
+	}
+	if existsItemsInDb {
 		if err := s.expenseRepo.CreateExpense(ctx, expense); err != nil {
 			return err
 		}

@@ -3,7 +3,10 @@ package store
 import (
 	"booker/model/repomodels"
 	"context"
+	"database/sql"
 	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 // CheckExist check entity exist in DB
@@ -44,10 +47,10 @@ func (i *ItemsRepo) CheckExistItem(ctx context.Context, item string) (bool, erro
 
 	exists, err := i.client.NewSelect().
 		Model(&items).
-		Where("item = ?", item).
+		Where("item_name = ?", item).
 		Exists(ctx)
 
-	if err != nil {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return true, fmt.Errorf("статья не найдена (обрабатывать в позитивном ключе): %w", err)
 	}
 
