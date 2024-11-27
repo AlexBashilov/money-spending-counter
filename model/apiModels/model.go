@@ -1,9 +1,10 @@
 package apiModels
 
 import (
+	"time"
+
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/google/uuid"
-	"time"
 )
 
 // UserCostItems struct items

@@ -1,12 +1,13 @@
 package store
 
 import (
-	"booker/model/repomodels"
 	"context"
 	"database/sql"
 	"fmt"
 
 	"github.com/pkg/errors"
+
+	"booker/model/repomodels"
 )
 
 // CheckExist check entity exist in DB

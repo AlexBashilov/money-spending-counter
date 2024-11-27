@@ -1,12 +1,13 @@
 package apiserver
 
 import (
-	respond "booker/internal/app/error"
-	"booker/internal/app/usecase"
-	"booker/model/apiModels"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	respond "booker/internal/app/error"
+	"booker/internal/app/usecase"
+	"booker/model/apiModels"
 )
 
 type ExpenseHandler struct {

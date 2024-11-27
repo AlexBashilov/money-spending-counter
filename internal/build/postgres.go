@@ -2,14 +2,15 @@ package build
 
 import (
 	"database/sql"
+	"log"
+	"os"
+	"strconv"
+
 	"github.com/joho/godotenv"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/extra/bundebug"
-	"log"
-	"os"
-	"strconv"
 )
 
 func NewStore() *bun.DB {

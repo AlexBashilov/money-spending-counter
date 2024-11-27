@@ -1,7 +1,6 @@
 package store
 
 import (
-	"booker/model/repomodels"
 	"context"
 	"database/sql"
 	"fmt"
@@ -10,6 +9,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/uptrace/bun"
+
+	"booker/model/repomodels"
 )
 
 // ItemsRepo initial items repo

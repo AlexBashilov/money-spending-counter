@@ -1,14 +1,15 @@
 package store
 
 import (
-	"booker/model/apiModels"
-	"booker/model/repomodels"
 	"context"
 	"database/sql"
 	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/uptrace/bun"
+
+	"booker/model/apiModels"
+	"booker/model/repomodels"
 )
 
 // ItemsRepo initial items repo

@@ -1,17 +1,18 @@
 package apiserver
 
 import (
-	_ "booker/docs" // swagger docs
-	respond "booker/internal/app/error"
-	"booker/internal/app/usecase"
-	"booker/model/apiModels"
-	"booker/utils/validator"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
+
+	_ "booker/docs" // swagger docs
+	respond "booker/internal/app/error"
+	"booker/internal/app/usecase"
+	"booker/model/apiModels"
+	"booker/utils/validator"
 )
 
 type ItemsHandler struct {

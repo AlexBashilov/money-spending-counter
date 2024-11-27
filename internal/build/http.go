@@ -1,12 +1,13 @@
 package build
 
 import (
-	"booker/internal/app/apiserver"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	httpSwagger "github.com/swaggo/http-swagger"
+
+	"booker/internal/app/apiserver"
 )
 
 type Server struct {

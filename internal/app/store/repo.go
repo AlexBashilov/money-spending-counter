@@ -1,8 +1,9 @@
 package store
 
 import (
-	"booker/model/repomodels"
 	"context"
+
+	"booker/model/repomodels"
 )
 
 // ItemsRepository interface
