@@ -2,14 +2,11 @@ package main
 
 import (
 	_ "booker/docs"
-	"booker/internal/app/trace"
 	"booker/internal/build"
+	cfg "booker/internal/config"
 	"flag"
 	"log"
 	"net/http"
-	"os"
-
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -27,22 +24,19 @@ func init() {
 // @externalDocs.url	https://swagger.io/resources/open-api/
 // @host				localhost:8080
 func main() {
-	itemsHandler, expenseHandler := build.BuildNewItemsHandler()
-
-	err := trace.NewTracer()
+	conf, err := cfg.Load()
 	if err != nil {
-		log.Fatal("init tracer", err)
+		panic(err)
 	}
+
+	itemsHandler, expenseHandler := build.BuildNewItemsHandler(conf)
 
 	srv := build.NewServer(itemsHandler, expenseHandler)
 
-	if err := godotenv.Load(".env"); err != nil {
-		log.Print("No .env file found")
-	}
-
 	log.Println("Booker started")
 
-	if err := http.ListenAndServe(os.Getenv("SERVICE_ADDRESS"), srv); err != nil {
+	httpAddress := conf.HTTPAddr()
+	if err := http.ListenAndServe(httpAddress, srv); err != nil {
 		panic(err)
 	}
 
