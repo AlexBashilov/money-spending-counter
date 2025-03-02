@@ -4,9 +4,12 @@ import (
 	_ "booker/docs"
 	"booker/internal/build"
 	cfg "booker/internal/config"
+	"context"
 	"flag"
 	"log"
 	"net/http"
+
+	"github.com/rs/zerolog"
 )
 
 var (
@@ -29,11 +32,17 @@ func main() {
 		panic(err)
 	}
 
+	ctx := context.Background()
+
 	itemsHandler, expenseHandler := build.BuildNewItemsHandler(conf)
 
 	srv := build.NewServer(itemsHandler, expenseHandler)
 
-	log.Println("Booker started")
+	if err := build.Tracer(ctx, conf); err != nil {
+		zerolog.Ctx(ctx).Err(err).Msg("connect to otlp")
+	}
+
+	log.Println("the application is launching")
 
 	httpAddress := conf.HTTPAddr()
 	if err := http.ListenAndServe(httpAddress, srv); err != nil {
