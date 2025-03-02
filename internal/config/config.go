@@ -71,6 +71,10 @@ func (c *Config) HTTPAddr() string {
 	return net.JoinHostPort(c.HTTP.Host, strconv.Itoa(int(c.HTTP.Port)))
 }
 
+func (c *Config) PGAddr() string {
+	return net.JoinHostPort(c.Postgres.Host, c.Postgres.Port)
+}
+
 func (c *Config) UseTrace() bool {
 	return c.App.WithTrace && c.OTLPTrace.Endpoint != ""
 }

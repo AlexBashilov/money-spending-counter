@@ -1,7 +1,6 @@
 package build
 
 import (
-	cfg "booker/internal/config"
 	"database/sql"
 	"strconv"
 
@@ -9,6 +8,8 @@ import (
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/extra/bundebug"
+
+	cfg "booker/internal/config"
 )
 
 func PgsqlConnection(cfg cfg.Config) *bun.DB {
@@ -17,8 +18,10 @@ func PgsqlConnection(cfg cfg.Config) *bun.DB {
 	// 	return nil, errors.Wrap(err, "cannot parse pg config")
 	// }
 
+	dbAddr := cfg.PGAddr()
+
 	dsn := pgdriver.NewConnector(
-		pgdriver.WithAddr(cfg.Postgres.Host),
+		pgdriver.WithAddr(dbAddr),
 		pgdriver.WithUser(cfg.Postgres.Username),
 		pgdriver.WithPassword(cfg.Postgres.Password),
 		pgdriver.WithDatabase(cfg.Postgres.Database),
