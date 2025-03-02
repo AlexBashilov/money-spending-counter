@@ -2,33 +2,36 @@ package build
 
 import (
 	"database/sql"
-	"log"
-	"os"
 	"strconv"
 
-	"github.com/joho/godotenv"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/extra/bundebug"
+
+	cfg "booker/internal/config"
 )
 
-func NewStore() *bun.DB {
-	if err := godotenv.Load(".env"); err != nil {
-		log.Print("No .env file found")
-	}
+func PgsqlConnection(cfg cfg.Config) *bun.DB {
+	// pgConf, err := pgx.ParseConfig(cfg.Postgres.DSN())
+	// if err != nil {
+	// 	return nil, errors.Wrap(err, "cannot parse pg config")
+	// }
+
+	dbAddr := cfg.PGAddr()
+
 	dsn := pgdriver.NewConnector(
-		pgdriver.WithAddr(os.Getenv("DB_HOST")),
-		pgdriver.WithUser(os.Getenv("DB_USER")),
-		pgdriver.WithPassword(os.Getenv("DB_PASS")),
-		pgdriver.WithDatabase(os.Getenv("DB_NAME")),
+		pgdriver.WithAddr(dbAddr),
+		pgdriver.WithUser(cfg.Postgres.Username),
+		pgdriver.WithPassword(cfg.Postgres.Password),
+		pgdriver.WithDatabase(cfg.Postgres.Database),
 		pgdriver.WithInsecure(true),
 	)
 
 	sqlDB := sql.OpenDB(dsn)
 	bunDB := bun.NewDB(sqlDB, pgdialect.New())
 
-	debug, err := strconv.ParseBool(os.Getenv("DB_DEBUG"))
+	debug, err := strconv.ParseBool(cfg.Postgres.Debug)
 	if err != nil {
 		panic(err)
 	}

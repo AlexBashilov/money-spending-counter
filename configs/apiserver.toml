@@ -2,3 +2,5 @@ bind_addr = ":8080"
 log_level = "debug"
 database_url = "postgres://root:root@127.0.0.1:5433/booker?sslmode=disable"
 jaegerendpoint = "127.0.0.1:16686"
+
+OTLP_TRACE_ENDPOINT=10.241.177.59:30806

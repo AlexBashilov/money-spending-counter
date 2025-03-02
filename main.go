@@ -2,14 +2,14 @@ package main
 
 import (
 	_ "booker/docs"
-	"booker/internal/app/trace"
 	"booker/internal/build"
+	cfg "booker/internal/config"
+	"context"
 	"flag"
 	"log"
 	"net/http"
-	"os"
 
-	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
 )
 
 var (
@@ -27,22 +27,25 @@ func init() {
 // @externalDocs.url	https://swagger.io/resources/open-api/
 // @host				localhost:8080
 func main() {
-	itemsHandler, expenseHandler := build.BuildNewItemsHandler()
-
-	err := trace.NewTracer()
+	conf, err := cfg.Load()
 	if err != nil {
-		log.Fatal("init tracer", err)
+		panic(err)
 	}
+
+	ctx := context.Background()
+
+	itemsHandler, expenseHandler := build.BuildNewItemsHandler(conf)
 
 	srv := build.NewServer(itemsHandler, expenseHandler)
 
-	if err := godotenv.Load(".env"); err != nil {
-		log.Print("No .env file found")
+	if err := build.Tracer(ctx, conf); err != nil {
+		zerolog.Ctx(ctx).Err(err).Msg("connect to otlp")
 	}
 
-	log.Println("Booker started")
+	log.Println("the application is launching")
 
-	if err := http.ListenAndServe(os.Getenv("SERVICE_ADDRESS"), srv); err != nil {
+	httpAddress := conf.HTTPAddr()
+	if err := http.ListenAndServe(httpAddress, srv); err != nil {
 		panic(err)
 	}
 
