@@ -19,7 +19,7 @@ type Config struct {
 }
 
 type App struct {
-	ENV              string  `envconfig:"APP_ENV"            default:"local"`
+	Environment      string  `envconfig:"APP_ENV"            default:"local"`
 	Name             string  `envconfig:"APP_NAME"           default:"app"`
 	LogLevel         string  `envconfig:"LOG_LEVEL"          default:"debug"`
 	WithTrace        bool    `envconfig:"WITH_TRACE"`

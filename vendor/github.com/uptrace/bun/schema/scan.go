@@ -18,7 +18,7 @@ import (
 	"github.com/uptrace/bun/internal"
 )
 
-var scannerType = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
+var scannerType = reflect.TypeFor[sql.Scanner]()
 
 type ScannerFunc func(dest reflect.Value, src interface{}) error
 
@@ -38,8 +38,8 @@ func init() {
 		reflect.Uint32:        scanUint64,
 		reflect.Uint64:        scanUint64,
 		reflect.Uintptr:       scanUint64,
-		reflect.Float32:       scanFloat64,
-		reflect.Float64:       scanFloat64,
+		reflect.Float32:       scanFloat,
+		reflect.Float64:       scanFloat,
 		reflect.Complex64:     nil,
 		reflect.Complex128:    nil,
 		reflect.Array:         nil,
@@ -111,7 +111,7 @@ func scanner(typ reflect.Type) ScannerFunc {
 	}
 
 	if kind != reflect.Ptr {
-		ptr := reflect.PtrTo(typ)
+		ptr := reflect.PointerTo(typ)
 		if ptr.Implements(scannerType) {
 			return addrScanner(scanScanner)
 		}
@@ -214,10 +214,13 @@ func scanUint64(dest reflect.Value, src interface{}) error {
 	}
 }
 
-func scanFloat64(dest reflect.Value, src interface{}) error {
+func scanFloat(dest reflect.Value, src interface{}) error {
 	switch src := src.(type) {
 	case nil:
 		dest.SetFloat(0)
+		return nil
+	case float32:
+		dest.SetFloat(float64(src))
 		return nil
 	case float64:
 		dest.SetFloat(src)

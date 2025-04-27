@@ -41,7 +41,7 @@ func (b *Builder) RestAPIServer(ctx context.Context) (*http.Server, error) {
 	return server, nil
 }
 
-func (b *Builder) registerWmsProxyHandlers(ctx context.Context, mux *mux.Router) error {
+func (b *Builder) registerBookerHandlers(ctx context.Context, mux *mux.Router) error {
 	pgRw, pgRo, err := b.BuildBunPgCons()
 	if err != nil {
 		return errors.Wrap(err, "creating http handlers")
@@ -53,7 +53,7 @@ func (b *Builder) registerWmsProxyHandlers(ctx context.Context, mux *mux.Router)
 	}
 
 	logger := zerolog.Ctx(ctx)
-	wmsClient := b.NewWmsClient()
+	bookerClient := b.NewWmsClient()
 	wmsAdapter := b.NewWmsAdapter(wmsClient, logger)
 	wmsProxyService := wp.NewService(repo, wmsAdapter, logger)
 	handler := wmsproxy.NewHandler(wmsProxyService, logger)

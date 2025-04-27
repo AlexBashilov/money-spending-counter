@@ -72,11 +72,12 @@ func (t *Tables) InProgress(typ reflect.Type) *Table {
 
 	table := new(Table)
 	t.inProgress[typ] = table
-	table.init(t.dialect, typ, false)
+	table.init(t.dialect, typ)
 
 	return table
 }
 
+// ByModel gets the table by its Go name.
 func (t *Tables) ByModel(name string) *Table {
 	var found *Table
 	t.tables.Range(func(typ reflect.Type, table *Table) bool {
@@ -89,6 +90,7 @@ func (t *Tables) ByModel(name string) *Table {
 	return found
 }
 
+// ByName gets the table by its SQL name.
 func (t *Tables) ByName(name string) *Table {
 	var found *Table
 	t.tables.Range(func(typ reflect.Type, table *Table) bool {
@@ -96,6 +98,16 @@ func (t *Tables) ByName(name string) *Table {
 			found = table
 			return false
 		}
+		return true
+	})
+	return found
+}
+
+// All returns all registered tables.
+func (t *Tables) All() []*Table {
+	var found []*Table
+	t.tables.Range(func(typ reflect.Type, table *Table) bool {
+		found = append(found, table)
 		return true
 	})
 	return found

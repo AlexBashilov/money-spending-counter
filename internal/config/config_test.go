@@ -29,6 +29,6 @@ func TestConfig(t *testing.T) {
 
 	lvl, err := conf.LogLevel()
 	require.NoError(t, err)
-	require.Equal(t, "test", conf.App.ENV)
+	require.Equal(t, "test", conf.App.Environment)
 	require.Equal(t, zerolog.ErrorLevel, lvl)
 }

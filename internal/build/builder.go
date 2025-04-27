@@ -7,12 +7,16 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
+	"github.com/uptrace/bun"
 )
 
 type Builder struct {
 	config config.Config
 
 	shutdown shutdown
+
+	pgRWConn *bun.DB
+	pgROConn *bun.DB
 
 	http struct {
 		router *mux.Router
