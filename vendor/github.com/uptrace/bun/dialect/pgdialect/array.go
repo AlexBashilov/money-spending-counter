@@ -3,12 +3,11 @@ package pgdialect
 import (
 	"database/sql"
 	"database/sql/driver"
-	"encoding/hex"
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 	"time"
-	"unicode/utf8"
 
 	"github.com/uptrace/bun/dialect"
 	"github.com/uptrace/bun/internal"
@@ -143,43 +142,37 @@ func (d *Dialect) arrayElemAppender(typ reflect.Type) schema.AppenderFunc {
 	if typ.Implements(driverValuerType) {
 		return arrayAppendDriverValue
 	}
+	if typ == timeType {
+		return appendTimeElemValue
+	}
+
 	switch typ.Kind() {
 	case reflect.String:
-		return arrayAppendStringValue
+		return appendStringElemValue
 	case reflect.Slice:
 		if typ.Elem().Kind() == reflect.Uint8 {
-			return arrayAppendBytesValue
+			return appendBytesElemValue
 		}
+	case reflect.Ptr:
+		return schema.PtrAppender(d.arrayElemAppender(typ.Elem()))
 	}
 	return schema.Appender(d, typ)
 }
 
-func arrayAppend(fmter schema.Formatter, b []byte, v interface{}) []byte {
-	switch v := v.(type) {
-	case int64:
-		return strconv.AppendInt(b, v, 10)
-	case float64:
-		return dialect.AppendFloat64(b, v)
-	case bool:
-		return dialect.AppendBool(b, v)
-	case []byte:
-		return arrayAppendBytes(b, v)
-	case string:
-		return arrayAppendString(b, v)
-	case time.Time:
-		return fmter.Dialect().AppendTime(b, v)
-	default:
-		err := fmt.Errorf("pgdialect: can't append %T", v)
-		return dialect.AppendError(b, err)
-	}
+func appendTimeElemValue(fmter schema.Formatter, b []byte, v reflect.Value) []byte {
+	ts := v.Convert(timeType).Interface().(time.Time)
+
+	b = append(b, '"')
+	b = appendTime(b, ts)
+	return append(b, '"')
 }
 
-func arrayAppendStringValue(fmter schema.Formatter, b []byte, v reflect.Value) []byte {
-	return arrayAppendString(b, v.String())
+func appendStringElemValue(fmter schema.Formatter, b []byte, v reflect.Value) []byte {
+	return appendStringElem(b, v.String())
 }
 
-func arrayAppendBytesValue(fmter schema.Formatter, b []byte, v reflect.Value) []byte {
-	return arrayAppendBytes(b, v.Bytes())
+func appendBytesElemValue(fmter schema.Formatter, b []byte, v reflect.Value) []byte {
+	return appendBytesElem(b, v.Bytes())
 }
 
 func arrayAppendDriverValue(fmter schema.Formatter, b []byte, v reflect.Value) []byte {
@@ -187,7 +180,7 @@ func arrayAppendDriverValue(fmter schema.Formatter, b []byte, v reflect.Value) [
 	if err != nil {
 		return dialect.AppendError(b, err)
 	}
-	return arrayAppend(fmter, b, iface)
+	return appendElem(b, iface)
 }
 
 func appendStringSliceValue(fmter schema.Formatter, b []byte, v reflect.Value) []byte {
@@ -204,7 +197,7 @@ func appendStringSlice(b []byte, ss []string) []byte {
 
 	b = append(b, '{')
 	for _, s := range ss {
-		b = arrayAppendString(b, s)
+		b = appendStringElem(b, s)
 		b = append(b, ',')
 	}
 	if len(ss) > 0 {
@@ -288,7 +281,7 @@ func appendFloat64Slice(b []byte, floats []float64) []byte {
 
 	b = append(b, '{')
 	for _, n := range floats {
-		b = dialect.AppendFloat64(b, n)
+		b = arrayAppendFloat64(b, n)
 		b = append(b, ',')
 	}
 	if len(floats) > 0 {
@@ -300,6 +293,19 @@ func appendFloat64Slice(b []byte, floats []float64) []byte {
 	b = append(b, '\'')
 
 	return b
+}
+
+func arrayAppendFloat64(b []byte, num float64) []byte {
+	switch {
+	case math.IsNaN(num):
+		return append(b, "NaN"...)
+	case math.IsInf(num, 1):
+		return append(b, "Infinity"...)
+	case math.IsInf(num, -1):
+		return append(b, "-Infinity"...)
+	default:
+		return strconv.AppendFloat(b, num, 'f', -1, 64)
+	}
 }
 
 func appendTimeSliceValue(fmter schema.Formatter, b []byte, v reflect.Value) []byte {
@@ -381,6 +387,10 @@ func arrayScanner(typ reflect.Type) schema.ScannerFunc {
 			} else if dest.Len() > 0 {
 				dest.Set(dest.Slice(0, 0))
 			}
+		}
+
+		if src == nil {
+			return nil
 		}
 
 		b, err := toBytes(src)
@@ -475,7 +485,7 @@ func decodeIntSlice(src interface{}) ([]int, error) {
 			continue
 		}
 
-		n, err := strconv.Atoi(bytesToString(elem))
+		n, err := strconv.Atoi(internal.String(elem))
 		if err != nil {
 			return nil, err
 		}
@@ -524,7 +534,7 @@ func decodeInt64Slice(src interface{}) ([]int64, error) {
 			continue
 		}
 
-		n, err := strconv.ParseInt(bytesToString(elem), 10, 64)
+		n, err := strconv.ParseInt(internal.String(elem), 10, 64)
 		if err != nil {
 			return nil, err
 		}
@@ -553,7 +563,7 @@ func scanFloat64SliceValue(dest reflect.Value, src interface{}) error {
 }
 
 func scanFloat64Slice(src interface{}) ([]float64, error) {
-	if src == -1 {
+	if src == nil {
 		return nil, nil
 	}
 
@@ -573,7 +583,7 @@ func scanFloat64Slice(src interface{}) ([]float64, error) {
 			continue
 		}
 
-		n, err := strconv.ParseFloat(bytesToString(elem), 64)
+		n, err := strconv.ParseFloat(internal.String(elem), 64)
 		if err != nil {
 			return nil, err
 		}
@@ -589,57 +599,10 @@ func scanFloat64Slice(src interface{}) ([]float64, error) {
 func toBytes(src interface{}) ([]byte, error) {
 	switch src := src.(type) {
 	case string:
-		return stringToBytes(src), nil
+		return internal.Bytes(src), nil
 	case []byte:
 		return src, nil
 	default:
-		return nil, fmt.Errorf("bun: got %T, wanted []byte or string", src)
+		return nil, fmt.Errorf("pgdialect: got %T, wanted []byte or string", src)
 	}
-}
-
-//------------------------------------------------------------------------------
-
-func arrayAppendBytes(b []byte, bs []byte) []byte {
-	if bs == nil {
-		return dialect.AppendNull(b)
-	}
-
-	b = append(b, `"\\x`...)
-
-	s := len(b)
-	b = append(b, make([]byte, hex.EncodedLen(len(bs)))...)
-	hex.Encode(b[s:], bs)
-
-	b = append(b, '"')
-
-	return b
-}
-
-func arrayAppendString(b []byte, s string) []byte {
-	b = append(b, '"')
-	for _, r := range s {
-		switch r {
-		case 0:
-			// ignore
-		case '\'':
-			b = append(b, "''"...)
-		case '"':
-			b = append(b, '\\', '"')
-		case '\\':
-			b = append(b, '\\', '\\')
-		default:
-			if r < utf8.RuneSelf {
-				b = append(b, byte(r))
-				break
-			}
-			l := len(b)
-			if cap(b)-l < utf8.UTFMax {
-				b = append(b, make([]byte, utf8.UTFMax)...)
-			}
-			n := utf8.EncodeRune(b[l:l+utf8.UTFMax], r)
-			b = b[:l+n]
-		}
-	}
-	b = append(b, '"')
-	return b
 }
